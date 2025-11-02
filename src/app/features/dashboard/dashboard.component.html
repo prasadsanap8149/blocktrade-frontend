@@ -1,0 +1,282 @@
+<div class="dashboard-container">
+    <!-- Loading Spinner -->
+    <div class="loading-container" *ngIf="isLoading()">
+        <mat-spinner diameter="40"></mat-spinner>
+        <p class="loading-text">Loading dashboard...</p>
+    </div>
+
+    <!-- Dashboard Content -->
+    <div class="dashboard-content" *ngIf="!isLoading()">
+        <!-- Header Section -->
+        <div class="dashboard-header">
+            <div class="welcome-section">
+                <h1 class="welcome-title">Welcome back, {{ userDisplayName() }}!</h1>
+                <p class="welcome-subtitle">{{ userRoleDisplay() }} • {{ currentUser()?.organizationName }}</p>
+            </div>
+
+            <!-- Journey Progress (if onboarding not complete) -->
+            <div class="journey-progress-card" *ngIf="shouldShowOnboarding()">
+                <mat-card class="progress-card">
+                    <mat-card-header>
+                        <mat-card-title>Complete Your Setup</mat-card-title>
+                        <mat-card-subtitle>{{ journeyProgress() | number:'1.0-0' }}% Complete</mat-card-subtitle>
+                    </mat-card-header>
+                    <mat-card-content>
+                        <mat-progress-bar mode="determinate" [value]="journeyProgress()" [color]="getProgressColor()">
+                        </mat-progress-bar>
+                        <div class="progress-actions">
+                            <button mat-raised-button color="primary" (click)="onCompleteProfile()">
+                                <mat-icon>person</mat-icon>
+                                Continue Setup
+                            </button>
+                            <button mat-button color="accent" (click)="onUploadDocuments()">
+                                <mat-icon>cloud_upload</mat-icon>
+                                Upload Documents
+                            </button>
+                        </div>
+                    </mat-card-content>
+                </mat-card>
+            </div>
+        </div>
+
+        <!-- Stats Grid -->
+        <div class="stats-grid">
+            <mat-card class="stat-card primary">
+                <mat-card-content>
+                    <div class="stat-content">
+                        <div class="stat-info">
+                            <span class="stat-label">Letters of Credit</span>
+                            <span class="stat-value">{{ formatNumber(dashboardStats().totalLettersOfCredit) }}</span>
+                        </div>
+                        <mat-icon class="stat-icon">account_balance</mat-icon>
+                    </div>
+                </mat-card-content>
+            </mat-card>
+
+            <mat-card class="stat-card accent">
+                <mat-card-content>
+                    <div class="stat-content">
+                        <div class="stat-info">
+                            <span class="stat-label">Pending Approvals</span>
+                            <span class="stat-value">{{ formatNumber(dashboardStats().pendingApprovals) }}</span>
+                        </div>
+                        <mat-icon class="stat-icon">pending_actions</mat-icon>
+                    </div>
+                </mat-card-content>
+            </mat-card>
+
+            <mat-card class="stat-card success">
+                <mat-card-content>
+                    <div class="stat-content">
+                        <div class="stat-info">
+                            <span class="stat-label">Completed Transactions</span>
+                            <span class="stat-value">{{ formatNumber(dashboardStats().completedTransactions) }}</span>
+                        </div>
+                        <mat-icon class="stat-icon">check_circle</mat-icon>
+                    </div>
+                </mat-card-content>
+            </mat-card>
+
+            <mat-card class="stat-card warning">
+                <mat-card-content>
+                    <div class="stat-content">
+                        <div class="stat-info">
+                            <span class="stat-label">Total Volume</span>
+                            <span class="stat-value">{{ formatCurrency(dashboardStats().totalVolume) }}</span>
+                        </div>
+                        <mat-icon class="stat-icon">trending_up</mat-icon>
+                    </div>
+                </mat-card-content>
+            </mat-card>
+
+            <mat-card class="stat-card info">
+                <mat-card-content>
+                    <div class="stat-content">
+                        <div class="stat-info">
+                            <span class="stat-label">Active Documents</span>
+                            <span class="stat-value">{{ formatNumber(dashboardStats().activeDocuments) }}</span>
+                        </div>
+                        <mat-icon class="stat-icon">description</mat-icon>
+                    </div>
+                </mat-card-content>
+            </mat-card>
+
+            <mat-card class="stat-card error">
+                <mat-card-content>
+                    <div class="stat-content">
+                        <div class="stat-info">
+                            <span class="stat-label">Pending Payments</span>
+                            <span class="stat-value">{{ formatNumber(dashboardStats().pendingPayments) }}</span>
+                        </div>
+                        <mat-icon class="stat-icon">payment</mat-icon>
+                    </div>
+                </mat-card-content>
+            </mat-card>
+        </div>
+
+        <!-- Main Content Grid -->
+        <div class="main-content-grid">
+            <!-- Quick Actions -->
+            <mat-card class="quick-actions-card">
+                <mat-card-header>
+                    <mat-card-title>
+                        <mat-icon>flash_on</mat-icon>
+                        Quick Actions
+                    </mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                    <div class="quick-actions-grid" *ngIf="availableQuickActions().length > 0; else noActionsTemplate">
+                        <button *ngFor="let action of availableQuickActions()" mat-raised-button [color]="action.color"
+                            class="quick-action-button" (click)="onQuickAction(action)">
+                            <div class="action-content">
+                                <mat-icon class="action-icon">{{ action.icon }}</mat-icon>
+                                <div class="action-text">
+                                    <span class="action-title">{{ action.title }}</span>
+                                    <span class="action-description">{{ action.description }}</span>
+                                </div>
+                            </div>
+                        </button>
+                    </div>
+
+                    <ng-template #noActionsTemplate>
+                        <div class="no-actions">
+                            <mat-icon class="no-actions-icon">info</mat-icon>
+                            <p class="no-actions-text">Complete your profile setup to access quick actions</p>
+                            <button mat-raised-button color="primary" (click)="onCompleteProfile()">
+                                Complete Setup
+                            </button>
+                        </div>
+                    </ng-template>
+                </mat-card-content>
+            </mat-card>
+
+            <!-- Recent Activities -->
+            <mat-card class="recent-activities-card">
+                <mat-card-header>
+                    <mat-card-title>
+                        <mat-icon>history</mat-icon>
+                        Recent Activities
+                    </mat-card-title>
+                    <button mat-button color="primary" (click)="onViewAllActivities()" class="view-all-button">
+                        View All
+                    </button>
+                </mat-card-header>
+                <mat-card-content>
+                    <div class="activities-list" *ngIf="recentActivities().length > 0; else noActivitiesTemplate">
+                        <div *ngFor="let activity of recentActivities()" class="activity-item">
+                            <div class="activity-icon-container">
+                                <mat-icon [class]="'activity-icon ' + getActivityColor(activity.status)">
+                                    {{ getActivityIcon(activity.type) }}
+                                </mat-icon>
+                            </div>
+                            <div class="activity-details">
+                                <div class="activity-header">
+                                    <span class="activity-title">{{ activity.title }}</span>
+                                    <span class="activity-time">{{ activity.timestamp | date:'short' }}</span>
+                                </div>
+                                <p class="activity-description">{{ activity.description }}</p>
+                                <div class="activity-meta" *ngIf="activity.amount">
+                                    <mat-chip [class]="'status-chip ' + getActivityColor(activity.status)">
+                                        {{ activity.status }}
+                                    </mat-chip>
+                                    <span class="activity-amount">{{ formatCurrency(activity.amount, activity.currency)
+                                        }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <ng-template #noActivitiesTemplate>
+                        <div class="no-activities">
+                            <mat-icon class="no-activities-icon">timeline</mat-icon>
+                            <p class="no-activities-text">No recent activities to display</p>
+                        </div>
+                    </ng-template>
+                </mat-card-content>
+            </mat-card>
+        </div>
+
+        <!-- Additional Information Cards -->
+        <div class="info-cards-grid">
+            <!-- System Status Card -->
+            <mat-card class="info-card">
+                <mat-card-header>
+                    <mat-card-title>
+                        <mat-icon>monitor_heart</mat-icon>
+                        System Status
+                    </mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                    <div class="status-items">
+                        <div class="status-item">
+                            <mat-icon class="status-icon success">check_circle</mat-icon>
+                            <span class="status-text">All systems operational</span>
+                        </div>
+                        <div class="status-item">
+                            <mat-icon class="status-icon success">security</mat-icon>
+                            <span class="status-text">Security systems active</span>
+                        </div>
+                        <div class="status-item">
+                            <mat-icon class="status-icon success">cloud_done</mat-icon>
+                            <span class="status-text">Blockchain network healthy</span>
+                        </div>
+                    </div>
+                </mat-card-content>
+            </mat-card>
+
+            <!-- Notifications Card -->
+            <mat-card class="info-card">
+                <mat-card-header>
+                    <mat-card-title>
+                        <mat-icon matBadge="3" matBadgeColor="warn">notifications</mat-icon>
+                        Notifications
+                    </mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                    <div class="notification-items">
+                        <div class="notification-item">
+                            <mat-icon class="notification-icon warning">warning</mat-icon>
+                            <div class="notification-text">
+                                <span class="notification-title">Document Expiring Soon</span>
+                                <span class="notification-subtitle">Certificate expires in 5 days</span>
+                            </div>
+                        </div>
+                        <div class="notification-item">
+                            <mat-icon class="notification-icon info">info</mat-icon>
+                            <div class="notification-text">
+                                <span class="notification-title">System Maintenance</span>
+                                <span class="notification-subtitle">Scheduled for this weekend</span>
+                            </div>
+                        </div>
+                    </div>
+                </mat-card-content>
+            </mat-card>
+
+            <!-- Compliance Status Card -->
+            <mat-card class="info-card">
+                <mat-card-header>
+                    <mat-card-title>
+                        <mat-icon>verified_user</mat-icon>
+                        Compliance Status
+                    </mat-card-title>
+                </mat-card-header>
+                <mat-card-content>
+                    <div class="compliance-items">
+                        <div class="compliance-item">
+                            <span class="compliance-label">KYC Status</span>
+                            <mat-chip class="status-chip success">Verified</mat-chip>
+                        </div>
+                        <div class="compliance-item">
+                            <span class="compliance-label">AML Screening</span>
+                            <mat-chip class="status-chip success">Cleared</mat-chip>
+                        </div>
+                        <div class="compliance-item">
+                            <span class="compliance-label">Document Verification</span>
+                            <mat-chip class="status-chip warning">Pending</mat-chip>
+                        </div>
+                    </div>
+                </mat-card-content>
+            </mat-card>
+        </div>
+    </div>
+</div>

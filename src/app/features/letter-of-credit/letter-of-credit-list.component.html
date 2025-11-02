@@ -1,0 +1,216 @@
+<!-- Letter of Credit List Component Template -->
+<div class="lc-list-container">
+    <!-- Header Section -->
+    <div class="header-section">
+        <div class="header-content">
+            <h1 class="page-title">Letters of Credit</h1>
+            <p class="page-subtitle">Manage and track your Letters of Credit</p>
+        </div>
+        <div class="header-actions">
+            <button mat-raised-button color="primary" class="create-lc-btn" (click)="onCreateLC()">
+                <mat-icon>add</mat-icon>
+                Create LC
+            </button>
+        </div>
+    </div>
+
+    <!-- Stats Tabs -->
+    <mat-tab-group [(selectedIndex)]="selectedTabIndex" class="stats-tabs">
+        <mat-tab [label]="'All (' + statusCounts().all + ')'">
+            <ng-template matTabContent>
+                <div class="tab-content">All Letters of Credit</div>
+            </ng-template>
+        </mat-tab>
+        <mat-tab [label]="'Draft (' + statusCounts().draft + ')'">
+            <ng-template matTabContent>
+                <div class="tab-content">Draft Letters of Credit</div>
+            </ng-template>
+        </mat-tab>
+        <mat-tab [label]="'Pending (' + statusCounts().pending + ')'">
+            <ng-template matTabContent>
+                <div class="tab-content">Pending Approval</div>
+            </ng-template>
+        </mat-tab>
+        <mat-tab [label]="'Active (' + statusCounts().approved + ')'">
+            <ng-template matTabContent>
+                <div class="tab-content">Active Letters of Credit</div>
+            </ng-template>
+        </mat-tab>
+        <mat-tab [label]="'Completed (' + statusCounts().completed + ')'">
+            <ng-template matTabContent>
+                <div class="tab-content">Completed Letters of Credit</div>
+            </ng-template>
+        </mat-tab>
+    </mat-tab-group>
+
+    <!-- Filters Section -->
+    <div class="filters-section">
+        <mat-form-field appearance="outline" class="filter-field">
+            <mat-label>Search</mat-label>
+            <input matInput [(ngModel)]="searchTerm" (input)="onSearch()"
+                placeholder="LC Number, Applicant, Beneficiary...">
+            <mat-icon matSuffix>search</mat-icon>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="filter-field">
+            <mat-label>Status</mat-label>
+            <mat-select [(ngModel)]="selectedStatus" (selectionChange)="onStatusFilter()">
+                <mat-option value="">All Statuses</mat-option>
+                <mat-option *ngFor="let status of statusOptions" [value]="status">
+                    {{getStatusLabel(status)}}
+                </mat-option>
+            </mat-select>
+        </mat-form-field>
+
+        <mat-form-field appearance="outline" class="filter-field">
+            <mat-label>Type</mat-label>
+            <mat-select [(ngModel)]="selectedType" (selectionChange)="onTypeFilter()">
+                <mat-option value="">All Types</mat-option>
+                <mat-option *ngFor="let type of typeOptions" [value]="type">
+                    {{getTypeLabel(type)}}
+                </mat-option>
+            </mat-select>
+        </mat-form-field>
+
+        <button mat-button (click)="onClearFilters()">
+            <mat-icon>clear</mat-icon>
+            Clear Filters
+        </button>
+    </div>
+
+    <!-- Loading State -->
+    <div class="loading-section" *ngIf="isLoading()">
+        <mat-spinner diameter="40"></mat-spinner>
+        <p>Loading Letters of Credit...</p>
+    </div>
+
+    <!-- LC List -->
+    <div class="lc-list-section" *ngIf="!isLoading()">
+        <!-- Empty State -->
+        <div class="empty-state" *ngIf="filteredLettersOfCredit().length === 0">
+            <mat-icon class="empty-icon">description</mat-icon>
+            <h3>No Letters of Credit Found</h3>
+            <p>Create your first Letter of Credit to get started.</p>
+            <button mat-raised-button color="primary" (click)="onCreateLC()">
+                <mat-icon>add</mat-icon>
+                Create Your First LC
+            </button>
+        </div>
+
+        <!-- LC Cards Grid -->
+        <div class="lc-grid" *ngIf="filteredLettersOfCredit().length > 0">
+            <mat-card *ngFor="let lc of filteredLettersOfCredit(); trackBy: trackByLCId" class="lc-card">
+
+                <!-- Card Header -->
+                <mat-card-header>
+                    <div class="lc-header">
+                        <div class="lc-number-section">
+                            <h3 class="lc-number">{{lc.lcNumber}}</h3>
+                            <mat-chip [class]="'status-' + lc.status">
+                                {{getStatusLabel(lc.status)}}
+                            </mat-chip>
+                        </div>
+                        <div class="lc-actions">
+                            <button mat-icon-button [matMenuTriggerFor]="lcMenu" class="more-actions-btn">
+                                <mat-icon>more_vert</mat-icon>
+                            </button>
+                            <mat-menu #lcMenu="matMenu">
+                                <button mat-menu-item (click)="onViewLC(lc)">
+                                    <mat-icon>visibility</mat-icon>
+                                    View Details
+                                </button>
+                                <button mat-menu-item (click)="onEditLC(lc)" [disabled]="!canEdit(lc)">
+                                    <mat-icon>edit</mat-icon>
+                                    Edit
+                                </button>
+                                <button mat-menu-item (click)="onDuplicateLC(lc)">
+                                    <mat-icon>content_copy</mat-icon>
+                                    Duplicate
+                                </button>
+                                <button mat-menu-item (click)="onCancelLC(lc)" [disabled]="!canCancel(lc)">
+                                    <mat-icon>cancel</mat-icon>
+                                    Cancel
+                                </button>
+                            </mat-menu>
+                        </div>
+                    </div>
+                </mat-card-header>
+
+                <!-- Card Content -->
+                <mat-card-content>
+                    <div class="lc-details">
+                        <!-- Parties -->
+                        <div class="parties-section">
+                            <div class="party-info">
+                                <div class="party-label">Applicant</div>
+                                <div class="party-name">{{lc.applicant.name}}</div>
+                                <div class="party-location">{{lc.applicant.address.city}},
+                                    {{lc.applicant.address.country}}</div>
+                            </div>
+                            <mat-icon class="arrow-icon">arrow_forward</mat-icon>
+                            <div class="party-info">
+                                <div class="party-label">Beneficiary</div>
+                                <div class="party-name">{{lc.beneficiary.name}}</div>
+                                <div class="party-location">{{lc.beneficiary.address.city}},
+                                    {{lc.beneficiary.address.country}}</div>
+                            </div>
+                        </div>
+
+                        <!-- Amount and Details -->
+                        <div class="amount-section">
+                            <div class="amount-display">
+                                <span class="currency">{{lc.amount.currency}}</span>
+                                <span class="value">{{lc.amount.value | number:'1.2-2'}}</span>
+                            </div>
+                            <div class="lc-type">{{getTypeLabel(lc.type)}}</div>
+                        </div>
+
+                        <!-- Important Dates -->
+                        <div class="dates-section">
+                            <div class="date-item">
+                                <mat-icon>calendar_today</mat-icon>
+                                <span class="date-label">Created:</span>
+                                <span class="date-value">{{lc.applicationDate | date:'MMM d, y'}}</span>
+                            </div>
+                            <div class="date-item">
+                                <mat-icon>event</mat-icon>
+                                <span class="date-label">Expires:</span>
+                                <span class="date-value" [class.expires-soon]="isExpiringSoon(lc.expiryDate)">
+                                    {{lc.expiryDate | date:'MMM d, y'}}
+                                </span>
+                            </div>
+                        </div>
+
+                        <!-- Bank Info -->
+                        <div class="bank-section">
+                            <div class="bank-info">
+                                <mat-icon>account_balance</mat-icon>
+                                <span class="bank-name">{{lc.issuingBank.name}}</span>
+                            </div>
+                            <div class="swift-code" *ngIf="lc.issuingBank.swiftCode">
+                                {{lc.issuingBank.swiftCode}}
+                            </div>
+                        </div>
+                    </div>
+                </mat-card-content>
+
+                <!-- Card Actions -->
+                <mat-card-actions align="end">
+                    <button mat-button color="primary" (click)="onViewLC(lc)">
+                        View Details
+                    </button>
+                    <button mat-raised-button color="primary" *ngIf="hasQuickAction(lc)"
+                        (click)="performQuickAction(lc)">
+                        {{getQuickActionLabel(lc)}}
+                    </button>
+                </mat-card-actions>
+            </mat-card>
+        </div>
+
+        <!-- Pagination -->
+        <mat-paginator *ngIf="filteredLettersOfCredit().length > 0" [length]="totalItems()" [pageSize]="pageSize()"
+            [pageSizeOptions]="[10, 25, 50, 100]" [pageIndex]="currentPage()" (page)="onPageChange($event)"
+            showFirstLastButtons>
+        </mat-paginator>
+    </div>
+</div>

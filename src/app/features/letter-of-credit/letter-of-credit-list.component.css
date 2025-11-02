@@ -1,0 +1,351 @@
+/* Letter of Credit List Component Styles */
+
+.lc-list-container {
+    padding: 24px;
+    max-width: 1200px;
+    margin: 0 auto;
+}
+
+.header-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 32px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.header-content {
+    flex: 1;
+}
+
+.page-title {
+    margin: 0 0 8px 0;
+    font-size: 32px;
+    font-weight: 500;
+    color: #1976d2;
+}
+
+.page-subtitle {
+    margin: 0;
+    color: #666;
+    font-size: 16px;
+}
+
+.header-actions {
+    display: flex;
+    gap: 16px;
+}
+
+.create-lc-btn {
+    min-width: 140px;
+}
+
+.stats-tabs {
+    margin-bottom: 24px;
+}
+
+.tab-content {
+    padding: 16px 0;
+    font-size: 14px;
+    color: #666;
+}
+
+.filters-section {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+    margin-bottom: 24px;
+    padding: 16px;
+    background: #f5f5f5;
+    border-radius: 8px;
+}
+
+.filter-field {
+    min-width: 200px;
+}
+
+.loading-section {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 48px;
+    text-align: center;
+}
+
+.loading-section p {
+    margin-top: 16px;
+    color: #666;
+}
+
+.empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 48px;
+    text-align: center;
+}
+
+.empty-icon {
+    font-size: 72px;
+    color: #ccc;
+    margin-bottom: 16px;
+}
+
+.empty-state h3 {
+    margin: 0 0 8px 0;
+    color: #333;
+}
+
+.empty-state p {
+    margin: 0 0 24px 0;
+    color: #666;
+}
+
+.lc-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(400px, 1fr));
+    gap: 24px;
+    margin-bottom: 32px;
+}
+
+.lc-card {
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: 1px solid #e0e0e0;
+}
+
+.lc-card:hover {
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+    transform: translateY(-2px);
+}
+
+.lc-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    width: 100%;
+}
+
+.lc-number-section {
+    flex: 1;
+}
+
+.lc-number {
+    margin: 0 0 8px 0;
+    font-size: 18px;
+    font-weight: 600;
+    color: #1976d2;
+}
+
+.lc-actions {
+    margin-left: 16px;
+}
+
+.lc-details {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.parties-section {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.party-info {
+    flex: 1;
+}
+
+.party-label {
+    font-size: 12px;
+    color: #666;
+    text-transform: uppercase;
+    margin-bottom: 4px;
+}
+
+.party-name {
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.party-location {
+    font-size: 14px;
+    color: #666;
+}
+
+.arrow-icon {
+    color: #ccc;
+}
+
+.amount-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 12px;
+    background: #f8f9fa;
+    border-radius: 6px;
+}
+
+.amount-display {
+    display: flex;
+    align-items: baseline;
+    gap: 4px;
+}
+
+.currency {
+    font-size: 14px;
+    color: #666;
+    font-weight: 500;
+}
+
+.value {
+    font-size: 20px;
+    font-weight: 600;
+    color: #2e7d32;
+}
+
+.lc-type {
+    font-size: 14px;
+    color: #666;
+    text-transform: capitalize;
+}
+
+.dates-section {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+}
+
+.date-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+}
+
+.date-item mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+    color: #666;
+}
+
+.date-label {
+    color: #666;
+}
+
+.date-value {
+    font-weight: 500;
+}
+
+.expires-soon {
+    color: #f57c00 !important;
+    font-weight: 600;
+}
+
+.bank-section {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 8px 0;
+    border-top: 1px solid #e0e0e0;
+}
+
+.bank-info {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.bank-info mat-icon {
+    color: #1976d2;
+}
+
+.bank-name {
+    font-weight: 500;
+}
+
+.swift-code {
+    font-size: 12px;
+    color: #666;
+    font-family: 'Courier New', monospace;
+}
+
+/* Status chip styles */
+mat-chip.status-draft {
+    background-color: #e3f2fd;
+    color: #1976d2;
+}
+
+mat-chip.status-pending_approval {
+    background-color: #fff3e0;
+    color: #f57c00;
+}
+
+mat-chip.status-approved {
+    background-color: #e8f5e8;
+    color: #2e7d32;
+}
+
+mat-chip.status-documents_submitted {
+    background-color: #f3e5f5;
+    color: #7b1fa2;
+}
+
+mat-chip.status-completed {
+    background-color: #e8f5e8;
+    color: #2e7d32;
+}
+
+mat-chip.status-cancelled {
+    background-color: #ffebee;
+    color: #d32f2f;
+}
+
+mat-chip.status-expired {
+    background-color: #ffebee;
+    color: #d32f2f;
+}
+
+/* Pagination */
+mat-paginator {
+    background: transparent;
+    margin-top: 24px;
+}
+
+/* Responsive design */
+@media (max-width: 768px) {
+    .lc-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .header-section {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 16px;
+    }
+
+    .filters-section {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .parties-section {
+        flex-direction: column;
+        align-items: stretch;
+    }
+
+    .arrow-icon {
+        transform: rotate(90deg);
+        align-self: center;
+    }
+
+    .dates-section {
+        flex-direction: column;
+        gap: 8px;
+    }
+}

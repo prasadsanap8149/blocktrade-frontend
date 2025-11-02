@@ -1,0 +1,139 @@
+<div class="login-container">
+    <!-- Background with pattern -->
+    <div class="login-background">
+        <div class="pattern-overlay"></div>
+    </div>
+
+    <!-- Login Card -->
+    <mat-card class="login-card">
+        <!-- Logo and Brand -->
+        <div class="brand-section">
+            <div class="logo">
+                <mat-icon class="logo-icon">account_balance</mat-icon>
+            </div>
+            <h1 class="brand-title">{{ APP_NAME }}</h1>
+            <p class="brand-subtitle">Blockchain Trade Finance Platform</p>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <!-- Login Form -->
+        <div class="form-section">
+            <h2 class="form-title">Sign In to Your Account</h2>
+
+            <!-- Account Locked Warning -->
+            <div class="account-locked-warning" *ngIf="isAccountLocked()">
+                <mat-icon class="warning-icon">lock</mat-icon>
+                <div class="warning-content">
+                    <strong>Account Temporarily Locked</strong>
+                    <p>{{ MESSAGES.ERROR.ACCOUNT_LOCKED }}</p>
+                </div>
+            </div>
+
+            <!-- Login Attempts Warning -->
+            <div class="attempts-warning" *ngIf="loginAttempts() > 0 && !isAccountLocked() && remainingAttempts <= 2">
+                <mat-icon class="warning-icon">warning</mat-icon>
+                <span>{{ remainingAttempts }} attempt(s) remaining before account lockout</span>
+            </div>
+
+            <form [formGroup]="loginForm" (ngSubmit)="onSubmit()" class="login-form">
+                <!-- Username Field -->
+                <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Username or Email</mat-label>
+                    <input matInput type="text" formControlName="username" placeholder="Enter your username or email"
+                        autocomplete="username" [class.error]="usernameError">
+                    <mat-icon matSuffix>person</mat-icon>
+                    <mat-error *ngIf="usernameError">{{ usernameError }}</mat-error>
+                </mat-form-field>
+
+                <!-- Password Field -->
+                <mat-form-field appearance="outline" class="full-width">
+                    <mat-label>Password</mat-label>
+                    <input matInput [type]="hidePassword() ? 'password' : 'text'" formControlName="password"
+                        placeholder="Enter your password" autocomplete="current-password" [class.error]="passwordError">
+                    <button mat-icon-button matSuffix type="button" (click)="togglePasswordVisibility()"
+                        [attr.aria-label]="'Hide password'" [attr.aria-pressed]="hidePassword()">
+                        <mat-icon>{{ hidePassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+                    </button>
+                    <mat-error *ngIf="passwordError">{{ passwordError }}</mat-error>
+                </mat-form-field>
+
+                <!-- MFA Code Field (if needed) -->
+                <mat-form-field appearance="outline" class="full-width" *ngIf="loginAttempts() > 0">
+                    <mat-label>Multi-Factor Authentication Code (Optional)</mat-label>
+                    <input matInput type="text" formControlName="mfaCode" placeholder="Enter 6-digit code" maxlength="6"
+                        pattern="[0-9]{6}">
+                    <mat-icon matSuffix>security</mat-icon>
+                    <mat-hint>Enter the 6-digit code from your authenticator app (if enabled)</mat-hint>
+                </mat-form-field>
+
+                <!-- Remember Me -->
+                <div class="form-options">
+                    <mat-checkbox formControlName="rememberMe" color="primary">
+                        Remember me for 30 days
+                    </mat-checkbox>
+
+                    <button type="button" mat-button color="primary" class="forgot-password-link"
+                        (click)="onForgotPassword()">
+                        Forgot Password?
+                    </button>
+                </div>
+
+                <!-- Submit Button -->
+                <button mat-raised-button color="primary" type="submit" class="login-button full-width"
+                    [disabled]="!canSubmit">
+                    <span *ngIf="!isLoading(); else loadingTemplate">Sign In</span>
+                    <ng-template #loadingTemplate>
+                        <mat-spinner diameter="20" color="accent"></mat-spinner>
+                        <span class="loading-text">Signing in...</span>
+                    </ng-template>
+                </button>
+
+                <!-- Security Notice -->
+                <div class="security-notice" *ngIf="loginAttempts() > 0">
+                    <mat-icon class="info-icon">info</mat-icon>
+                    <span class="notice-text">
+                        For security, accounts are temporarily locked after {{ MAX_LOGIN_ATTEMPTS }} failed attempts.
+                    </span>
+                </div>
+            </form>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <!-- Additional Options -->
+        <div class="additional-options">
+            <p class="signup-prompt">
+                Don't have an account?
+                <button mat-button color="primary" (click)="onCreateAccount()" class="signup-link">
+                    Create Account
+                </button>
+            </p>
+
+            <div class="help-links">
+                <button mat-button color="accent" class="help-link">
+                    <mat-icon>help_outline</mat-icon>
+                    Help Center
+                </button>
+                <button mat-button color="accent" class="help-link">
+                    <mat-icon>contact_support</mat-icon>
+                    Contact Support
+                </button>
+            </div>
+        </div>
+    </mat-card>
+
+    <!-- Footer -->
+    <div class="login-footer">
+        <p class="footer-text">
+            Powered by blockchain technology • Secure • Compliant
+        </p>
+        <div class="footer-links">
+            <a href="#" class="footer-link">Privacy Policy</a>
+            <span class="divider">•</span>
+            <a href="#" class="footer-link">Terms of Service</a>
+            <span class="divider">•</span>
+            <a href="#" class="footer-link">Security</a>
+        </div>
+    </div>
+</div>
