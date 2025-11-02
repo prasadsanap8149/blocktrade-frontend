@@ -1,0 +1,651 @@
+/* PWA Install Component Styles */
+.pwa-install-container {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+    max-width: 600px;
+    margin: 0 auto;
+    padding: var(--spacing-md);
+}
+
+/* Common Card Styles */
+.pwa-card,
+.installed-card,
+.update-card,
+.instructions-card {
+    margin-bottom: var(--spacing-md);
+    transition: all var(--transition-normal);
+    border-radius: var(--border-radius-large);
+    overflow: hidden;
+}
+
+.pwa-card:hover,
+.installed-card:hover,
+.update-card:hover {
+    box-shadow: var(--shadow-3);
+    transform: translateY(-2px);
+}
+
+/* PWA Card Styles */
+.pwa-header {
+    background: linear-gradient(135deg, var(--primary-color), #1565c0);
+    color: white;
+    padding: var(--spacing-lg);
+    margin: calc(var(--spacing-md) * -1);
+    margin-bottom: var(--spacing-md);
+}
+
+.app-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    overflow: hidden;
+    background: white;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.app-icon img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.app-title {
+    color: white !important;
+    font-size: var(--font-size-xl);
+    font-weight: 600;
+    margin-bottom: var(--spacing-xs);
+}
+
+.app-subtitle {
+    color: rgba(255, 255, 255, 0.9) !important;
+    font-size: var(--font-size-md);
+    font-weight: 400;
+}
+
+/* PWA Content */
+.pwa-content {
+    padding: var(--spacing-lg);
+}
+
+.installation-status {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-sm) var(--spacing-md);
+    border-radius: var(--border-radius);
+    margin-bottom: var(--spacing-lg);
+    transition: all var(--transition-fast);
+}
+
+.installation-status.online {
+    background-color: rgba(76, 175, 80, 0.1);
+    color: var(--success-color);
+    border: 1px solid rgba(76, 175, 80, 0.3);
+}
+
+.installation-status.offline {
+    background-color: rgba(255, 152, 0, 0.1);
+    color: var(--warning-color);
+    border: 1px solid rgba(255, 152, 0, 0.3);
+}
+
+.status-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+}
+
+.status-text {
+    font-weight: 500;
+    font-size: var(--font-size-sm);
+}
+
+/* Features List */
+.features-list {
+    margin-bottom: var(--spacing-lg);
+}
+
+.features-list h4 {
+    color: var(--text-primary);
+    font-size: var(--font-size-lg);
+    font-weight: 600;
+    margin-bottom: var(--spacing-md);
+}
+
+.features-list ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.features-list li {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    padding: var(--spacing-sm) 0;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+}
+
+.features-list li:last-child {
+    border-bottom: none;
+}
+
+.features-list mat-icon {
+    color: var(--primary-color);
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+}
+
+.features-list span {
+    color: var(--text-secondary);
+    font-size: var(--font-size-sm);
+}
+
+/* PWA Support Warning */
+.pwa-support {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-md);
+    background-color: rgba(255, 152, 0, 0.1);
+    border: 1px solid rgba(255, 152, 0, 0.3);
+    border-radius: var(--border-radius);
+    margin-bottom: var(--spacing-md);
+}
+
+.warning-icon {
+    color: var(--warning-color);
+    font-size: 24px;
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+}
+
+.pwa-support p {
+    margin: 0;
+    color: var(--warning-color);
+    font-size: var(--font-size-sm);
+    line-height: 1.5;
+}
+
+/* PWA Actions */
+.pwa-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-lg);
+    background-color: var(--background-tertiary);
+}
+
+.install-btn,
+.instructions-btn,
+.share-btn {
+    flex: 1;
+    min-width: 120px;
+    height: 44px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--spacing-xs);
+    font-weight: 500;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.install-btn {
+    background: linear-gradient(135deg, var(--primary-color), #1565c0);
+    color: white;
+    box-shadow: var(--shadow-1);
+}
+
+.install-btn:hover:not(:disabled) {
+    box-shadow: var(--shadow-2);
+    transform: translateY(-1px);
+}
+
+.install-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.spinning {
+    animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+    0% {
+        transform: rotate(0deg);
+    }
+
+    100% {
+        transform: rotate(360deg);
+    }
+}
+
+/* Installed Card Styles */
+.installed-header {
+    background: linear-gradient(135deg, var(--success-color), #388e3c);
+    color: white;
+    padding: var(--spacing-lg);
+    margin: calc(var(--spacing-md) * -1);
+    margin-bottom: var(--spacing-md);
+}
+
+.success-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.success-icon mat-icon {
+    color: white;
+    font-size: 32px;
+    width: 32px;
+    height: 32px;
+}
+
+.installed-content {
+    padding: var(--spacing-lg);
+}
+
+.installed-features {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-md);
+}
+
+.feature-item {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    padding: var(--spacing-sm) 0;
+}
+
+.feature-icon {
+    color: var(--success-color);
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+}
+
+.installed-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-lg);
+    background-color: var(--background-tertiary);
+}
+
+/* Update Card Styles */
+.update-header {
+    background: linear-gradient(135deg, var(--accent-color), #c2185b);
+    color: white;
+    padding: var(--spacing-lg);
+    margin: calc(var(--spacing-md) * -1);
+    margin-bottom: var(--spacing-md);
+}
+
+.update-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.update-icon mat-icon {
+    color: white;
+    font-size: 32px;
+    width: 32px;
+    height: 32px;
+}
+
+.update-content {
+    padding: var(--spacing-lg);
+}
+
+.update-content p {
+    margin-bottom: var(--spacing-md);
+    color: var(--text-secondary);
+    font-size: var(--font-size-md);
+}
+
+.update-benefits {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-sm);
+}
+
+.benefit-item {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-md);
+    padding: var(--spacing-xs) 0;
+}
+
+.benefit-item mat-icon {
+    color: var(--accent-color);
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+}
+
+.benefit-item span {
+    color: var(--text-secondary);
+    font-size: var(--font-size-sm);
+}
+
+.update-actions {
+    display: flex;
+    gap: var(--spacing-sm);
+    padding: var(--spacing-lg);
+    background-color: var(--background-tertiary);
+}
+
+.update-btn {
+    background: linear-gradient(135deg, var(--accent-color), #c2185b);
+    color: white;
+    flex: 1;
+}
+
+.later-btn {
+    min-width: 100px;
+}
+
+/* Instructions Card Styles */
+.instructions-header {
+    background: linear-gradient(135deg, var(--info-color), #1976d2);
+    color: white;
+    padding: var(--spacing-lg);
+    margin: calc(var(--spacing-md) * -1);
+    margin-bottom: var(--spacing-md);
+}
+
+.info-icon {
+    width: 60px;
+    height: 60px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.info-icon mat-icon {
+    color: white;
+    font-size: 32px;
+    width: 32px;
+    height: 32px;
+}
+
+.instructions-content {
+    padding: var(--spacing-lg);
+}
+
+.instruction-steps {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-lg);
+}
+
+.step {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--spacing-md);
+    padding: var(--spacing-md);
+    background-color: var(--background-tertiary);
+    border-radius: var(--border-radius);
+    border-left: 4px solid var(--info-color);
+}
+
+.step-number {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 32px;
+    height: 32px;
+    background: var(--info-color);
+    color: white;
+    border-radius: 50%;
+    font-weight: 600;
+    font-size: var(--font-size-sm);
+    flex-shrink: 0;
+}
+
+.step p {
+    margin: 0;
+    color: var(--text-primary);
+    font-size: var(--font-size-md);
+    line-height: 1.5;
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-xs);
+}
+
+.step mat-icon {
+    color: var(--info-color);
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+}
+
+.instructions-actions {
+    display: flex;
+    justify-content: flex-end;
+    padding: var(--spacing-lg);
+    background-color: var(--background-tertiary);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .pwa-install-container {
+        padding: var(--spacing-sm);
+    }
+
+    .pwa-actions,
+    .installed-actions,
+    .update-actions {
+        flex-direction: column;
+    }
+
+    .install-btn,
+    .instructions-btn,
+    .share-btn,
+    .update-btn {
+        width: 100%;
+        margin-bottom: var(--spacing-sm);
+    }
+
+    .app-title {
+        font-size: var(--font-size-lg);
+    }
+
+    .app-subtitle {
+        font-size: var(--font-size-sm);
+    }
+
+    .features-list li {
+        padding: var(--spacing-md) 0;
+    }
+
+    .step {
+        flex-direction: column;
+        text-align: center;
+    }
+
+    .step-number {
+        align-self: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .pwa-install-container {
+        padding: var(--spacing-xs);
+    }
+
+    .pwa-header,
+    .installed-header,
+    .update-header,
+    .instructions-header {
+        padding: var(--spacing-md);
+    }
+
+    .pwa-content,
+    .installed-content,
+    .update-content,
+    .instructions-content {
+        padding: var(--spacing-md);
+    }
+
+    .app-icon,
+    .success-icon,
+    .update-icon,
+    .info-icon {
+        width: 48px;
+        height: 48px;
+    }
+
+    .features-list h4 {
+        font-size: var(--font-size-md);
+    }
+
+    .features-list li {
+        gap: var(--spacing-sm);
+    }
+}
+
+/* Print Styles */
+@media print {
+    .pwa-install-container {
+        display: none;
+    }
+}
+
+/* Dark Theme Support */
+[data-theme='dark'] {
+
+    .pwa-card,
+    .installed-card,
+    .update-card,
+    .instructions-card {
+        background-color: var(--background-secondary);
+        color: var(--text-primary);
+    }
+
+    .installation-status.online {
+        background-color: rgba(76, 175, 80, 0.2);
+    }
+
+    .installation-status.offline {
+        background-color: rgba(255, 152, 0, 0.2);
+    }
+
+    .pwa-support {
+        background-color: rgba(255, 152, 0, 0.2);
+    }
+
+    .pwa-actions,
+    .installed-actions,
+    .update-actions,
+    .instructions-actions {
+        background-color: var(--background-tertiary);
+    }
+
+    .step {
+        background-color: var(--background-tertiary);
+    }
+}
+
+/* High Contrast Mode */
+@media (prefers-contrast: high) {
+
+    .pwa-card,
+    .installed-card,
+    .update-card,
+    .instructions-card {
+        border: 2px solid var(--text-primary);
+    }
+
+    .installation-status {
+        border-width: 2px;
+    }
+
+    .step {
+        border-left-width: 6px;
+    }
+}
+
+/* Reduced Motion */
+@media (prefers-reduced-motion: reduce) {
+
+    .pwa-card,
+    .installed-card,
+    .update-card,
+    .instructions-card {
+        transition: none;
+    }
+
+    .pwa-card:hover,
+    .installed-card:hover,
+    .update-card:hover {
+        transform: none;
+    }
+
+    .install-btn:hover:not(:disabled) {
+        transform: none;
+    }
+
+    .spinning {
+        animation: none;
+    }
+}
+
+/* Focus Styles */
+.install-btn:focus,
+.instructions-btn:focus,
+.share-btn:focus,
+.update-btn:focus,
+.later-btn:focus {
+    outline: 3px solid var(--primary-color);
+    outline-offset: 2px;
+}
+
+/* Loading States */
+.install-btn[disabled] {
+    position: relative;
+    overflow: hidden;
+}
+
+.install-btn[disabled]::after {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: -100%;
+    width: 100%;
+    height: 100%;
+    background: linear-gradient(90deg,
+            transparent,
+            rgba(255, 255, 255, 0.2),
+            transparent);
+    animation: loading-shimmer 1.5s infinite;
+}
+
+@keyframes loading-shimmer {
+    0% {
+        left: -100%;
+    }
+
+    100% {
+        left: 100%;
+    }
+}

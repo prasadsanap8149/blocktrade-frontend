@@ -1,0 +1,229 @@
+/* Optimized Header Styles */
+.app-header {
+    position: sticky;
+    top: 0;
+    z-index: 1000;
+    height: 64px;
+    padding: 0 16px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+}
+
+.header-brand {
+    display: flex;
+    align-items: center;
+    cursor: pointer;
+}
+
+.header-brand:hover {
+    transform: scale(1.02);
+}
+
+.brand-logo {
+    height: 40px;
+    width: auto;
+    margin-right: 12px;
+}
+
+.brand-logo.logo-mobile {
+    height: 32px;
+    margin-right: 0;
+}
+
+.brand-text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.2;
+}
+
+.brand-title {
+    margin: 0;
+    font-size: 20px;
+    font-weight: 600;
+    color: white;
+}
+
+.brand-subtitle {
+    font-size: 12px;
+    opacity: 0.9;
+    color: rgba(255, 255, 255, 0.8);
+}
+
+.menu-toggle {
+    margin-right: 8px;
+}
+
+.header-spacer {
+    flex: 1 1 auto;
+}
+
+.search-container {
+    display: flex;
+    align-items: center;
+    margin: 0 16px;
+    max-width: 400px;
+    flex: 0 1 auto;
+}
+
+.search-field {
+    width: 100%;
+    min-width: 250px;
+}
+
+.header-actions {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.action-button {
+    color: white;
+    position: relative;
+}
+
+.action-button:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+    transform: scale(1.1);
+}
+
+.user-avatar {
+    color: white;
+    margin-left: 8px;
+}
+
+.user-avatar:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+
+.avatar-icon {
+    font-size: 28px;
+    width: 28px;
+    height: 28px;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .app-header {
+        padding: 0 8px;
+        height: 56px;
+    }
+
+    .search-container {
+        display: none;
+    }
+
+    .header-actions {
+        gap: 4px;
+    }
+
+    .action-button {
+        width: 40px;
+        height: 40px;
+    }
+
+    .brand-title {
+        font-size: 18px;
+    }
+
+    .notifications-menu,
+    .user-menu,
+    .quick-actions-menu {
+        min-width: calc(100vw - 32px);
+        max-width: calc(100vw - 32px);
+    }
+}
+
+@media (max-width: 480px) {
+    .app-header {
+        padding: 0 4px;
+    }
+
+    .brand-text {
+        display: none;
+    }
+
+    .header-actions {
+        gap: 2px;
+    }
+
+    .action-button {
+        width: 36px;
+        height: 36px;
+    }
+
+    .avatar-icon {
+        font-size: 24px;
+        width: 24px;
+        height: 24px;
+    }
+}
+
+/* Dark Theme Support */
+@media (prefers-color-scheme: dark) {
+    .app-header {
+        background-color: #1e1e1e;
+        border-bottom: 1px solid #333;
+    }
+
+    .search-field ::ng-deep .mdc-text-field--outlined {
+        background-color: rgba(255, 255, 255, 0.05);
+    }
+
+    .notification-item.unread {
+        background-color: rgba(33, 150, 243, 0.08);
+    }
+
+    .notification-message {
+        color: rgba(255, 255, 255, 0.6);
+    }
+
+    .notification-time {
+        color: rgba(255, 255, 255, 0.4);
+    }
+
+    .no-notifications {
+        color: rgba(255, 255, 255, 0.6);
+    }
+}
+
+/* Animation for smooth transitions */
+.header-brand,
+.action-button,
+.user-avatar,
+.notification-item {
+    will-change: transform, background-color;
+}
+
+/* Focus styles for accessibility */
+.action-button:focus,
+.user-avatar:focus,
+.header-brand:focus {
+    outline: 2px solid rgba(255, 255, 255, 0.8);
+    outline-offset: 2px;
+}
+
+/* Badge customization */
+.action-button ::ng-deep .mat-badge-content {
+    font-size: 10px;
+    font-weight: 600;
+    min-width: 16px;
+    height: 16px;
+    line-height: 16px;
+}
+
+/* Scrollbar styling for notifications */
+.notifications-list::-webkit-scrollbar {
+    width: 4px;
+}
+
+.notifications-list::-webkit-scrollbar-track {
+    background: rgba(0, 0, 0, 0.1);
+}
+
+.notifications-list::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.3);
+    border-radius: 2px;
+}
+
+.notifications-list::-webkit-scrollbar-thumb:hover {
+    background: rgba(0, 0, 0, 0.5);
+}

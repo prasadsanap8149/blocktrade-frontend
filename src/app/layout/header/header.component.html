@@ -1,0 +1,182 @@
+<!-- Header Component Template -->
+<mat-toolbar class="app-header" color="primary">
+    <!-- Mobile Menu Button -->
+    <button mat-icon-button class="menu-toggle" *ngIf="isMobile" (click)="onMenuToggle()"
+        [attr.aria-label]="'Toggle navigation menu'">
+        <mat-icon>{{ sidenavOpened ? 'close' : 'menu' }}</mat-icon>
+    </button>
+
+    <!-- Logo and Title -->
+    <div class="header-brand" (click)="navigateToHome()">
+        <img src="assets/images/logo.svg" alt="BlockTrade Logo" class="brand-logo" [class.logo-mobile]="isMobile" />
+        <div class="brand-text" *ngIf="!isMobile">
+            <h1 class="brand-title">BlockTrade</h1>
+            <span class="brand-subtitle">Trade Finance Platform</span>
+        </div>
+    </div>
+
+    <!-- Spacer -->
+    <span class="header-spacer"></span>
+
+    <!-- Search Bar (Desktop only) -->
+    <div class="search-container" *ngIf="!isMobile && showSearch">
+        <mat-form-field appearance="outline" class="search-field">
+            <mat-icon matPrefix>search</mat-icon>
+            <input matInput placeholder="Search LCs, Organizations, Documents..." [(ngModel)]="searchQuery"
+                (keyup.enter)="onSearch()" [attr.aria-label]="'Search'" />
+            <button mat-icon-button matSuffix *ngIf="searchQuery" (click)="clearSearch()"
+                [attr.aria-label]="'Clear search'">
+                <mat-icon>clear</mat-icon>
+            </button>
+        </mat-form-field>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="header-actions">
+        <!-- Quick Actions Dropdown -->
+        <button mat-icon-button class="action-button" [matMenuTriggerFor]="quickActionsMenu"
+            [attr.aria-label]="'Quick actions'" *ngIf="hasPermission(['lc:create'])">
+            <mat-icon>add</mat-icon>
+        </button>
+
+        <!-- Notifications -->
+        <button mat-icon-button class="action-button" [matMenuTriggerFor]="notificationsMenu"
+            [attr.aria-label]="'Notifications'" [matBadge]="unreadNotifications()"
+            [matBadgeHidden]="unreadNotifications() === 0" matBadgeColor="warn" matBadgeSize="small">
+            <mat-icon>{{ unreadNotifications() > 0 ? 'notifications' : 'notifications_none' }}</mat-icon>
+        </button>
+
+        <!-- Theme Toggle -->
+        <button mat-icon-button class="action-button" (click)="toggleTheme()" [attr.aria-label]="'Toggle theme'"
+            [matTooltip]="isDarkTheme() ? 'Switch to light theme' : 'Switch to dark theme'">
+            <mat-icon>{{ isDarkTheme() ? 'light_mode' : 'dark_mode' }}</mat-icon>
+        </button>
+
+        <!-- Help -->
+        <button mat-icon-button class="action-button" routerLink="/help" [attr.aria-label]="'Help and support'"
+            matTooltip="Help & Support">
+            <mat-icon>help_outline</mat-icon>
+        </button>
+
+        <!-- User Profile -->
+        <button mat-icon-button class="user-avatar" [matMenuTriggerFor]="userMenu" [attr.aria-label]="'User menu'">
+            <mat-icon class="avatar-icon">account_circle</mat-icon>
+        </button>
+    </div>
+</mat-toolbar>
+
+<!-- Quick Actions Menu -->
+<mat-menu #quickActionsMenu="matMenu" class="quick-actions-menu">
+    <button mat-menu-item routerLink="/letters-of-credit/create" *ngIf="hasPermission(['lc:create'])">
+        <mat-icon>description</mat-icon>
+        <span>New Letter of Credit</span>
+    </button>
+    <button mat-menu-item routerLink="/organizations/create" *ngIf="hasPermission(['organization:create'])">
+        <mat-icon>business</mat-icon>
+        <span>Add Organization</span>
+    </button>
+    <button mat-menu-item routerLink="/users/create" *ngIf="hasPermission(['user:create'])">
+        <mat-icon>person_add</mat-icon>
+        <span>Create User</span>
+    </button>
+    <mat-divider></mat-divider>
+    <button mat-menu-item routerLink="/import">
+        <mat-icon>upload</mat-icon>
+        <span>Import Data</span>
+    </button>
+    <button mat-menu-item routerLink="/reports/generate">
+        <mat-icon>assessment</mat-icon>
+        <span>Generate Report</span>
+    </button>
+</mat-menu>
+
+<!-- Notifications Menu -->
+<mat-menu #notificationsMenu="matMenu" class="notifications-menu">
+    <div class="notifications-header">
+        <h3>Notifications</h3>
+        <button mat-icon-button (click)="markAllAsRead()" *ngIf="unreadNotifications() > 0">
+            <mat-icon>done_all</mat-icon>
+        </button>
+    </div>
+
+    <div class="notifications-list" *ngIf="notifications.length > 0; else noNotifications">
+        <div class="notification-item"
+            *ngFor="let notification of notifications().slice(0, 5); trackBy: trackNotification"
+            [class.unread]="!notification.read" (click)="markAsRead(notification)">
+            <div class="notification-icon" [class]="'notification-' + notification.type">
+                <mat-icon>{{ getNotificationIcon(notification.type) }}</mat-icon>
+            </div>
+            <div class="notification-content">
+                <h4 class="notification-title">{{ notification.title }}</h4>
+                <p class="notification-message">{{ notification.message }}</p>
+                <span class="notification-time">{{ formatTime(notification.timestamp) }}</span>
+            </div>
+        </div>
+    </div>
+
+    <ng-template #noNotifications>
+        <div class="no-notifications">
+            <mat-icon>notifications_none</mat-icon>
+            <p>No new notifications</p>
+        </div>
+    </ng-template>
+
+    <mat-divider></mat-divider>
+    <button mat-menu-item routerLink="/notifications">
+        <mat-icon>list</mat-icon>
+        <span>View All Notifications</span>
+    </button>
+</mat-menu>
+
+<!-- User Menu -->
+<mat-menu #userMenu="matMenu" class="user-menu">
+    <div class="user-info" *ngIf="currentUser">
+        <div class="user-details">
+            <h3 class="user-name">{{ currentUser.firstName }} {{ currentUser.lastName }}</h3>
+            <p class="user-email">{{ currentUser.email }}</p>
+            <p class="user-role">{{ formatRole(currentUser.role) }}</p>
+            <p class="user-organization">{{ currentUser.organizationName }}</p>
+        </div>
+    </div>
+
+    <mat-divider></mat-divider>
+
+    <button mat-menu-item routerLink="/profile">
+        <mat-icon>person</mat-icon>
+        <span>My Profile</span>
+    </button>
+
+    <button mat-menu-item routerLink="/settings">
+        <mat-icon>settings</mat-icon>
+        <span>Settings</span>
+    </button>
+
+    <button mat-menu-item routerLink="/security">
+        <mat-icon>security</mat-icon>
+        <span>Security</span>
+    </button>
+
+    <mat-divider></mat-divider>
+
+    <button mat-menu-item (click)="onLogout()">
+        <mat-icon>logout</mat-icon>
+        <span>Logout</span>
+    </button>
+</mat-menu>
+
+<!-- Mobile Search Bar -->
+<div class="mobile-search" *ngIf="isMobile && showMobileSearch">
+    <mat-form-field appearance="outline" class="mobile-search-field">
+        <mat-icon matPrefix>search</mat-icon>
+        <input matInput placeholder="Search..." [(ngModel)]="searchQuery" (keyup.enter)="onSearch()" #searchInput />
+        <button mat-icon-button matSuffix (click)="closeMobileSearch()">
+            <mat-icon>close</mat-icon>
+        </button>
+    </mat-form-field>
+</div>
+
+<!-- Search Button for Mobile -->
+<button mat-icon-button class="mobile-search-toggle" *ngIf="isMobile && showSearch && !showMobileSearch"
+    (click)="openMobileSearch()" [attr.aria-label]="'Open search'">
+    <mat-icon>search</mat-icon>
+</button>

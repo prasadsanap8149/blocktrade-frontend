@@ -1,0 +1,249 @@
+<div class="pwa-install-container">
+    <!-- PWA Installation Card -->
+    <mat-card class="pwa-card" *ngIf="!isStandalone">
+        <mat-card-header class="pwa-header">
+            <div mat-card-avatar class="app-icon">
+                <img [src]="getAppIcon()" alt="TradeFinance App Icon" />
+            </div>
+            <mat-card-title class="app-title">Install TradeFinance</mat-card-title>
+            <mat-card-subtitle class="app-subtitle">
+                Get the full app experience with offline access
+            </mat-card-subtitle>
+        </mat-card-header>
+
+        <mat-card-content class="pwa-content">
+            <!-- Installation Status -->
+            <div class="installation-status" [ngClass]="{
+        'online': isOnline,
+        'offline': !isOnline
+      }">
+                <mat-icon class="status-icon">
+                    {{ isOnline ? 'wifi' : 'wifi_off' }}
+                </mat-icon>
+                <span class="status-text">
+                    {{ isOnline ? 'Connected' : 'Offline' }}
+                </span>
+            </div>
+
+            <!-- Features List -->
+            <div class="features-list">
+                <h4>App Features:</h4>
+                <ul>
+                    <li>
+                        <mat-icon>offline_bolt</mat-icon>
+                        <span>Work offline with cached data</span>
+                    </li>
+                    <li>
+                        <mat-icon>notification_important</mat-icon>
+                        <span>Push notifications for important updates</span>
+                    </li>
+                    <li>
+                        <mat-icon>security</mat-icon>
+                        <span>Enhanced security features</span>
+                    </li>
+                    <li>
+                        <mat-icon>speed</mat-icon>
+                        <span>Faster loading and better performance</span>
+                    </li>
+                    <li>
+                        <mat-icon>home_screen</mat-icon>
+                        <span>Add to home screen for quick access</span>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- PWA Support Check -->
+            <div class="pwa-support" *ngIf="!isPwaSupported">
+                <mat-icon class="warning-icon">warning</mat-icon>
+                <p>Your browser doesn't fully support PWA features.
+                    Consider updating to the latest version for the best experience.</p>
+            </div>
+        </mat-card-content>
+
+        <mat-card-actions class="pwa-actions">
+            <!-- Install Button -->
+            <button mat-raised-button color="primary" class="install-btn" [disabled]="isInstalling() || !isPwaSupported"
+                (click)="installApp()">
+                <mat-icon *ngIf="!isInstalling()">get_app</mat-icon>
+                <mat-icon *ngIf="isInstalling()" class="spinning">refresh</mat-icon>
+                <span>{{ isInstalling() ? 'Installing...' : 'Install App' }}</span>
+            </button>
+
+            <!-- Manual Instructions Button -->
+            <button mat-stroked-button color="primary" class="instructions-btn" (click)="showInstallInstructions()">
+                <mat-icon>help_outline</mat-icon>
+                <span>Show Instructions</span>
+            </button>
+
+            <!-- Share Button -->
+            <button mat-stroked-button class="share-btn" (click)="shareApp()">
+                <mat-icon>share</mat-icon>
+                <span>Share App</span>
+            </button>
+        </mat-card-actions>
+    </mat-card>
+
+    <!-- Already Installed Message -->
+    <mat-card class="installed-card" *ngIf="isStandalone">
+        <mat-card-header class="installed-header">
+            <div mat-card-avatar class="success-icon">
+                <mat-icon>check_circle</mat-icon>
+            </div>
+            <mat-card-title>App Installed!</mat-card-title>
+            <mat-card-subtitle>
+                You're using the installed version of TradeFinance
+            </mat-card-subtitle>
+        </mat-card-header>
+
+        <mat-card-content class="installed-content">
+            <div class="installed-features">
+                <div class="feature-item">
+                    <mat-icon class="feature-icon">offline_bolt</mat-icon>
+                    <span>Offline mode enabled</span>
+                </div>
+                <div class="feature-item">
+                    <mat-icon class="feature-icon">notifications_active</mat-icon>
+                    <span>Push notifications active</span>
+                </div>
+                <div class="feature-item">
+                    <mat-icon class="feature-icon">speed</mat-icon>
+                    <span>Optimized performance</span>
+                </div>
+            </div>
+        </mat-card-content>
+
+        <mat-card-actions class="installed-actions">
+            <button mat-stroked-button color="primary" (click)="requestStorage()">
+                <mat-icon>storage</mat-icon>
+                <span>Enable Persistent Storage</span>
+            </button>
+
+            <button mat-stroked-button (click)="shareApp()">
+                <mat-icon>share</mat-icon>
+                <span>Share with Others</span>
+            </button>
+        </mat-card-actions>
+    </mat-card>
+
+    <!-- Update Available Card -->
+    <mat-card class="update-card" *ngIf="updateAvailable">
+        <mat-card-header class="update-header">
+            <div mat-card-avatar class="update-icon">
+                <mat-icon>system_update</mat-icon>
+            </div>
+            <mat-card-title>Update Available</mat-card-title>
+            <mat-card-subtitle>
+                A new version of the app is ready to install
+            </mat-card-subtitle>
+        </mat-card-header>
+
+        <mat-card-content class="update-content">
+            <p>Install the latest update to get new features and improvements.</p>
+            <div class="update-benefits">
+                <div class="benefit-item">
+                    <mat-icon>new_releases</mat-icon>
+                    <span>New features and improvements</span>
+                </div>
+                <div class="benefit-item">
+                    <mat-icon>security</mat-icon>
+                    <span>Security updates</span>
+                </div>
+                <div class="benefit-item">
+                    <mat-icon>bug_report</mat-icon>
+                    <span>Bug fixes</span>
+                </div>
+            </div>
+        </mat-card-content>
+
+        <mat-card-actions class="update-actions">
+            <button mat-raised-button color="accent" class="update-btn" (click)="applyUpdate()">
+                <mat-icon>system_update_alt</mat-icon>
+                <span>Update Now</span>
+            </button>
+
+            <button mat-stroked-button class="later-btn">
+                <span>Later</span>
+            </button>
+        </mat-card-actions>
+    </mat-card>
+
+    <!-- Manual Instructions Panel -->
+    <mat-card class="instructions-card" *ngIf="showInstructions()">
+        <mat-card-header class="instructions-header">
+            <div mat-card-avatar class="info-icon">
+                <mat-icon>info</mat-icon>
+            </div>
+            <mat-card-title>Installation Instructions</mat-card-title>
+            <mat-card-subtitle>
+                Manual installation for {{ getBrowserName() }}
+            </mat-card-subtitle>
+        </mat-card-header>
+
+        <mat-card-content class="instructions-content">
+            <div class="browser-instructions" [ngSwitch]="getBrowserName()">
+                <!-- Chrome Instructions -->
+                <div *ngSwitchCase="'Chrome'" class="instruction-steps">
+                    <div class="step">
+                        <span class="step-number">1</span>
+                        <p>Look for the install icon <mat-icon>add_to_home_screen</mat-icon> in the address bar</p>
+                    </div>
+                    <div class="step">
+                        <span class="step-number">2</span>
+                        <p>Click the icon and select "Install"</p>
+                    </div>
+                    <div class="step">
+                        <span class="step-number">3</span>
+                        <p>The app will be added to your device</p>
+                    </div>
+                </div>
+
+                <!-- Firefox Instructions -->
+                <div *ngSwitchCase="'Firefox'" class="instruction-steps">
+                    <div class="step">
+                        <span class="step-number">1</span>
+                        <p>Look for the install option in the address bar or menu</p>
+                    </div>
+                    <div class="step">
+                        <span class="step-number">2</span>
+                        <p>Click "Install" when prompted</p>
+                    </div>
+                </div>
+
+                <!-- Safari Instructions -->
+                <div *ngSwitchCase="'Safari'" class="instruction-steps">
+                    <div class="step">
+                        <span class="step-number">1</span>
+                        <p>Tap the Share button <mat-icon>share</mat-icon></p>
+                    </div>
+                    <div class="step">
+                        <span class="step-number">2</span>
+                        <p>Select "Add to Home Screen"</p>
+                    </div>
+                    <div class="step">
+                        <span class="step-number">3</span>
+                        <p>Tap "Add" to confirm</p>
+                    </div>
+                </div>
+
+                <!-- Default Instructions -->
+                <div *ngSwitchDefault class="instruction-steps">
+                    <div class="step">
+                        <span class="step-number">1</span>
+                        <p>Look for install options in your browser menu or address bar</p>
+                    </div>
+                    <div class="step">
+                        <span class="step-number">2</span>
+                        <p>Follow the prompts to install the app</p>
+                    </div>
+                </div>
+            </div>
+        </mat-card-content>
+
+        <mat-card-actions class="instructions-actions">
+            <button mat-stroked-button color="primary" (click)="hideInstallInstructions()">
+                <mat-icon>close</mat-icon>
+                <span>Got it</span>
+            </button>
+        </mat-card-actions>
+    </mat-card>
+</div>

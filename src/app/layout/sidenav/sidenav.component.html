@@ -1,0 +1,15 @@
+<nav class="sidenav-content">
+    <mat-nav-list>
+        <a mat-list-item *ngFor="let item of menuItems" [routerLink]="item.path" routerLinkActive="active"
+            class="nav-item">
+            <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
+            <span matListItemTitle>{{ item.label }}</span>
+        </a>
+    </mat-nav-list>
+
+    <mat-divider></mat-divider>
+
+    <div class="sidenav-footer">
+        <p class="version">Version 1.0.0</p>
+    </div>
+</nav>
