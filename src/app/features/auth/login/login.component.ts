@@ -45,6 +45,7 @@ export class LoginComponent implements OnInit {
   hidePassword = signal(true);
   loginAttempts = signal(0);
   isAccountLocked = signal(false);
+  apiErrors = signal<string[]>([]);
   
   loginForm!: FormGroup;
   returnUrl = '/dashboard';
@@ -88,14 +89,17 @@ export class LoginComponent implements OnInit {
 
   onSubmit(): void {
     if (this.loginForm.valid && !this.isLoading() && !this.isAccountLocked()) {
+      // Immediately set loading to prevent multiple submissions
+      this.isLoading.set(true);
       this.performLogin();
-    } else {
+    } else if (!this.loginForm.valid) {
       this.markFormGroupTouched();
     }
   }
 
   private performLogin(): void {
-    this.isLoading.set(true);
+    // Clear any previous errors
+    this.apiErrors.set([]);
 
     const loginData: UserLogin = {
       username: this.loginForm.get('username')?.value.trim(),
@@ -119,12 +123,52 @@ export class LoginComponent implements OnInit {
 
   private handleLoginSuccess(): void {
     this.loginAttempts.set(0);
+    this.apiErrors.set([]);
     this.router.navigate([this.returnUrl]);
   }
 
   private handleLoginError(error: any): void {
     const newAttempts = this.loginAttempts() + 1;
     this.loginAttempts.set(newAttempts);
+
+    const errors: string[] = [];
+    
+    if (error.error?.details && Array.isArray(error.error.details)) {
+      // Handle validation errors from server
+      error.error.details.forEach((detail: any) => {
+        if (detail.message) {
+          errors.push(detail.message);
+        }
+      });
+    } else if (error.message) {
+      errors.push(error.message);
+    } else {
+      // Default error based on status code
+      switch (error.status) {
+        case 400:
+          errors.push('Invalid login credentials. Please check your username and password.');
+          break;
+        case 401:
+          errors.push('Invalid username or password.');
+          break;
+        case 403:
+          errors.push('Your account has been locked. Please contact support.');
+          break;
+        case 422:
+          errors.push('Please check your input and try again.');
+          break;
+        case 429:
+          errors.push('Too many login attempts. Please try again later.');
+          break;
+        case 500:
+          errors.push('Server error. Please try again later.');
+          break;
+        default:
+          errors.push('Login failed. Please try again.');
+      }
+    }
+    
+    this.apiErrors.set(errors);
 
     if (newAttempts >= this.MAX_LOGIN_ATTEMPTS) {
       this.isAccountLocked.set(true);

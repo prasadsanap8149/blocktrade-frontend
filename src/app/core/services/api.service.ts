@@ -5,8 +5,8 @@
 
 import { Injectable } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams, HttpErrorResponse } from '@angular/common/http';
-import { Observable, throwError, BehaviorSubject, of } from 'rxjs';
-import { catchError, retry, tap, map, switchMap } from 'rxjs/operators';
+import { Observable, throwError, BehaviorSubject, of, timer } from 'rxjs';
+import { catchError, retryWhen, mergeMap, tap, map, switchMap, take, delay } from 'rxjs/operators';
 
 
 import { AuthTokens, User } from '../models/user.model';
@@ -63,6 +63,33 @@ export class ApiService {
   }
 
   /**
+   * Smart retry logic that only retries on network errors and 500 errors
+   */
+  private smartRetry<T>() {
+    return retryWhen<T>(errors =>
+      errors.pipe(
+        mergeMap((error, index) => {
+          const shouldRetry = (
+            error.status === 0 || // Network error
+            error.status >= 500 || // Server errors
+            error.name === 'TimeoutError'
+          ) && index < APP_CONFIG.API.RETRY_ATTEMPTS;
+
+          if (shouldRetry) {
+            // Exponential backoff: wait 1s, 2s, 4s...
+            const delayTime = Math.pow(2, index) * 1000;
+            console.log(`Retrying API call (attempt ${index + 1}/${APP_CONFIG.API.RETRY_ATTEMPTS}) after ${delayTime}ms delay`);
+            return timer(delayTime);
+          } else {
+            return throwError(error);
+          }
+        }),
+        take(APP_CONFIG.API.RETRY_ATTEMPTS)
+      )
+    );
+  }
+
+  /**
    * Generic GET request
    */
   get<T>(endpoint: string, params?: QueryParams, options?: ApiRequestOptions): Observable<ApiResponse<T>> {
@@ -76,7 +103,7 @@ export class ApiService {
       reportProgress: options?.reportProgress,
       withCredentials: options?.withCredentials
     }).pipe(
-      retry(APP_CONFIG.API.RETRY_ATTEMPTS),
+      this.smartRetry<ApiResponse<T>>(),
       catchError(this.handleError.bind(this))
     );
   }
@@ -93,7 +120,7 @@ export class ApiService {
       reportProgress: options?.reportProgress,
       withCredentials: options?.withCredentials
     }).pipe(
-      retry(APP_CONFIG.API.RETRY_ATTEMPTS),
+      this.smartRetry<ApiResponse<T>>(),
       catchError(this.handleError.bind(this))
     );
   }
@@ -110,7 +137,7 @@ export class ApiService {
       reportProgress: options?.reportProgress,
       withCredentials: options?.withCredentials
     }).pipe(
-      retry(APP_CONFIG.API.RETRY_ATTEMPTS),
+      this.smartRetry<ApiResponse<T>>(),
       catchError(this.handleError.bind(this))
     );
   }
@@ -127,7 +154,7 @@ export class ApiService {
       reportProgress: options?.reportProgress,
       withCredentials: options?.withCredentials
     }).pipe(
-      retry(APP_CONFIG.API.RETRY_ATTEMPTS),
+      this.smartRetry<ApiResponse<T>>(),
       catchError(this.handleError.bind(this))
     );
   }
@@ -144,7 +171,7 @@ export class ApiService {
       reportProgress: options?.reportProgress,
       withCredentials: options?.withCredentials
     }).pipe(
-      retry(APP_CONFIG.API.RETRY_ATTEMPTS),
+      this.smartRetry<ApiResponse<T>>(),
       catchError(this.handleError.bind(this))
     );
   }

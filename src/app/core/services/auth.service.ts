@@ -75,7 +75,7 @@ export class AuthService {
         }
       }),
       catchError(error => {
-        this.notificationService.error(error.message || this.getMessage('ERROR.INVALID_CREDENTIALS'));
+        // Don't show notification here, let the component handle it
         return throwError(error);
       })
     );
@@ -90,11 +90,11 @@ export class AuthService {
       tap(authResponse => {
         if (authResponse.success && authResponse.data) {
           this.handleSuccessfulAuth(authResponse.data);
-          this.notificationService.success(this.getMessage('SUCCESS.REGISTRATION'));
+          // Don't show notification here, let the component handle it
         }
       }),
       catchError(error => {
-        this.notificationService.error(error.message || this.getMessage('ERROR.GENERIC'));
+        // Don't show notification here, let the component handle it
         return throwError(error);
       })
     );

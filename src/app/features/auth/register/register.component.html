@@ -1,0 +1,289 @@
+<div class="register-container">
+    <!-- Background with pattern -->
+    <div class="register-background">
+        <div class="pattern-overlay"></div>
+    </div>
+
+    <!-- Registration Card -->
+    <mat-card class="register-card">
+        <!-- Logo and Brand -->
+        <div class="brand-section">
+            <div class="logo">
+                <mat-icon class="logo-icon">account_balance</mat-icon>
+            </div>
+            <h1 class="brand-title">{{ APP_NAME }}</h1>
+            <p class="brand-subtitle">Create Your BlockTrade Account</p>
+        </div>
+
+        <mat-divider></mat-divider>
+
+        <!-- Success State -->
+        <div class="success-section" *ngIf="registrationSuccess()">
+            <div class="success-content">
+                <mat-icon class="success-icon">check_circle</mat-icon>
+                <h2 class="success-title">Registration Successful!</h2>
+                <p class="success-message">
+                    Welcome to BlockTrade! Your account has been created successfully.
+                    You will be redirected to the dashboard shortly.
+                </p>
+                <mat-spinner diameter="30" color="primary"></mat-spinner>
+            </div>
+        </div>
+
+        <!-- Registration Form -->
+        <div class="form-section" *ngIf="!registrationSuccess()">
+            <!-- API Error Messages -->
+            <div class="error-section" *ngIf="apiErrors().length > 0">
+                <mat-icon class="error-icon">error</mat-icon>
+                <div class="error-content">
+                    <strong>Registration Failed</strong>
+                    <ul class="error-list">
+                        <li *ngFor="let error of apiErrors()">{{ error }}</li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Stepper -->
+            <mat-stepper [selectedIndex]="currentStep()" orientation="horizontal" #stepper>
+                <!-- Step 1: Personal Information -->
+                <mat-step [stepControl]="personalInfoForm" label="Personal Info">
+                    <ng-template matStepLabel>Personal Information</ng-template>
+
+                    <form [formGroup]="personalInfoForm" class="step-form">
+                        <h3 class="step-title">Tell us about yourself</h3>
+
+                        <div class="form-row">
+                            <mat-form-field appearance="outline" class="half-width">
+                                <mat-label>First Name</mat-label>
+                                <input matInput type="text" formControlName="firstName"
+                                    placeholder="Enter your first name" autocomplete="given-name">
+                                <mat-icon matSuffix>person</mat-icon>
+                                <mat-error>{{ getFieldError(personalInfoForm, 'firstName') }}</mat-error>
+                            </mat-form-field>
+
+                            <mat-form-field appearance="outline" class="half-width">
+                                <mat-label>Last Name</mat-label>
+                                <input matInput type="text" formControlName="lastName"
+                                    placeholder="Enter your last name" autocomplete="family-name">
+                                <mat-icon matSuffix>person</mat-icon>
+                                <mat-error>{{ getFieldError(personalInfoForm, 'lastName') }}</mat-error>
+                            </mat-form-field>
+                        </div>
+
+                        <mat-form-field appearance="outline" class="full-width">
+                            <mat-label>Email Address</mat-label>
+                            <input matInput type="email" formControlName="email" placeholder="Enter your email address"
+                                autocomplete="email">
+                            <mat-icon matSuffix>email</mat-icon>
+                            <mat-error>{{ getFieldError(personalInfoForm, 'email') }}</mat-error>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="full-width">
+                            <mat-label>Phone Number</mat-label>
+                            <input matInput type="tel" formControlName="phone" placeholder="Enter your phone number"
+                                autocomplete="tel">
+                            <mat-icon matSuffix>phone</mat-icon>
+                            <mat-error>{{ getFieldError(personalInfoForm, 'phone') }}</mat-error>
+                        </mat-form-field>
+
+                        <div class="step-actions">
+                            <button mat-raised-button color="primary" (click)="nextStep()"
+                                [disabled]="!canProceedToNext" class="next-button">
+                                Next
+                                <mat-icon>navigate_next</mat-icon>
+                            </button>
+                        </div>
+                    </form>
+                </mat-step>
+
+                <!-- Step 2: Organization Information -->
+                <mat-step [stepControl]="organizationForm" label="Organization">
+                    <ng-template matStepLabel>Organization Details</ng-template>
+
+                    <form [formGroup]="organizationForm" class="step-form">
+                        <h3 class="step-title">Organization Information</h3>
+
+                        <mat-form-field appearance="outline" class="full-width">
+                            <mat-label>Organization Name</mat-label>
+                            <input matInput type="text" formControlName="organizationName"
+                                placeholder="Enter your organization name">
+                            <mat-icon matSuffix>business</mat-icon>
+                            <mat-error>{{ getFieldError(organizationForm, 'organizationName') }}</mat-error>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="full-width">
+                            <mat-label>Organization Type</mat-label>
+                            <mat-select formControlName="organizationType">
+                                <mat-option *ngFor="let type of organizationTypes" [value]="type.value">
+                                    {{ type.label }}
+                                </mat-option>
+                            </mat-select>
+                            <mat-icon matSuffix>category</mat-icon>
+                            <mat-error>{{ getFieldError(organizationForm, 'organizationType') }}</mat-error>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="full-width">
+                            <mat-label>Organization ID (Optional)</mat-label>
+                            <input matInput type="text" formControlName="organizationId"
+                                placeholder="Enter existing organization ID if applicable">
+                            <mat-icon matSuffix>badge</mat-icon>
+                            <mat-hint>Leave blank if this is a new organization</mat-hint>
+                        </mat-form-field>
+
+                        <!-- Address Section -->
+                        <div formGroupName="address" class="address-section">
+                            <h4 class="section-subtitle">Organization Address</h4>
+
+                            <mat-form-field appearance="outline" class="full-width">
+                                <mat-label>Street Address</mat-label>
+                                <input matInput type="text" formControlName="street" placeholder="Enter street address">
+                                <mat-icon matSuffix>location_on</mat-icon>
+                                <mat-error>{{ getNestedFieldError('address.street') }}</mat-error>
+                            </mat-form-field>
+
+                            <div class="form-row">
+                                <mat-form-field appearance="outline" class="half-width">
+                                    <mat-label>City</mat-label>
+                                    <input matInput type="text" formControlName="city" placeholder="Enter city">
+                                    <mat-error>{{ getNestedFieldError('address.city') }}</mat-error>
+                                </mat-form-field>
+
+                                <mat-form-field appearance="outline" class="half-width">
+                                    <mat-label>State/Province</mat-label>
+                                    <input matInput type="text" formControlName="state"
+                                        placeholder="Enter state or province">
+                                    <mat-error>{{ getNestedFieldError('address.state') }}</mat-error>
+                                </mat-form-field>
+                            </div>
+
+                            <div class="form-row">
+                                <mat-form-field appearance="outline" class="half-width">
+                                    <mat-label>Country</mat-label>
+                                    <input matInput type="text" formControlName="country" placeholder="Enter country">
+                                    <mat-error>{{ getNestedFieldError('address.country') }}</mat-error>
+                                </mat-form-field>
+
+                                <mat-form-field appearance="outline" class="half-width">
+                                    <mat-label>Postal Code</mat-label>
+                                    <input matInput type="text" formControlName="postalCode"
+                                        placeholder="Enter postal code">
+                                    <mat-error>{{ getNestedFieldError('address.postalCode') }}</mat-error>
+                                </mat-form-field>
+                            </div>
+                        </div>
+
+                        <div class="step-actions">
+                            <button mat-button (click)="previousStep()" class="back-button">
+                                <mat-icon>navigate_before</mat-icon>
+                                Back
+                            </button>
+                            <button mat-raised-button color="primary" (click)="nextStep()"
+                                [disabled]="!canProceedToNext" class="next-button">
+                                Next
+                                <mat-icon>navigate_next</mat-icon>
+                            </button>
+                        </div>
+                    </form>
+                </mat-step>
+
+                <!-- Step 3: Security Setup -->
+                <mat-step [stepControl]="securityForm" label="Security">
+                    <ng-template matStepLabel>Security Setup</ng-template>
+
+                    <form [formGroup]="securityForm" (ngSubmit)="onSubmit()" class="step-form">
+                        <h3 class="step-title">Secure Your Account</h3>
+
+                        <mat-form-field appearance="outline" class="full-width">
+                            <mat-label>Username</mat-label>
+                            <input matInput type="text" formControlName="username" placeholder="Choose a username"
+                                autocomplete="username">
+                            <mat-icon matSuffix>account_circle</mat-icon>
+                            <mat-hint>Username can only contain letters, numbers, and underscores</mat-hint>
+                            <mat-error>{{ getFieldError(securityForm, 'username') }}</mat-error>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="full-width">
+                            <mat-label>Password</mat-label>
+                            <input matInput [type]="hidePassword() ? 'password' : 'text'" formControlName="password"
+                                placeholder="Choose a strong password" autocomplete="new-password">
+                            <button mat-icon-button matSuffix type="button" (click)="togglePasswordVisibility()"
+                                [attr.aria-label]="'Hide password'" [attr.aria-pressed]="hidePassword()">
+                                <mat-icon>{{ hidePassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+                            </button>
+                            <mat-hint>Password must contain uppercase, lowercase, number, and special
+                                character</mat-hint>
+                            <mat-error>{{ getFieldError(securityForm, 'password') }}</mat-error>
+                        </mat-form-field>
+
+                        <mat-form-field appearance="outline" class="full-width">
+                            <mat-label>Confirm Password</mat-label>
+                            <input matInput [type]="hideConfirmPassword() ? 'password' : 'text'"
+                                formControlName="confirmPassword" placeholder="Confirm your password"
+                                autocomplete="new-password">
+                            <button mat-icon-button matSuffix type="button" (click)="toggleConfirmPasswordVisibility()"
+                                [attr.aria-label]="'Hide password'" [attr.aria-pressed]="hideConfirmPassword()">
+                                <mat-icon>{{ hideConfirmPassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+                            </button>
+                            <mat-error>{{ getFieldError(securityForm, 'confirmPassword') || passwordMismatchError
+                                }}</mat-error>
+                        </mat-form-field>
+
+                        <!-- Terms and Conditions -->
+                        <div class="terms-section">
+                            <mat-checkbox formControlName="acceptTerms" color="primary" class="terms-checkbox">
+                                I agree to the
+                                <a href="/legal/terms" target="_blank" class="terms-link">Terms of Service</a>
+                                and
+                                <a href="/legal/privacy" target="_blank" class="terms-link">Privacy Policy</a>
+                            </mat-checkbox>
+                            <mat-error *ngIf="getFieldError(securityForm, 'acceptTerms')" class="checkbox-error">
+                                {{ getFieldError(securityForm, 'acceptTerms') }}
+                            </mat-error>
+                        </div>
+
+                        <div class="step-actions">
+                            <button mat-button (click)="previousStep()" class="back-button">
+                                <mat-icon>navigate_before</mat-icon>
+                                Back
+                            </button>
+                            <button mat-raised-button color="primary" type="submit" [disabled]="!canSubmit"
+                                class="submit-button">
+                                <span *ngIf="!isLoading(); else loadingTemplate">Create Account</span>
+                                <ng-template #loadingTemplate>
+                                    <mat-spinner diameter="20" color="accent"></mat-spinner>
+                                    <span class="loading-text">Creating account...</span>
+                                </ng-template>
+                            </button>
+                        </div>
+                    </form>
+                </mat-step>
+            </mat-stepper>
+        </div>
+
+        <mat-divider *ngIf="!registrationSuccess()"></mat-divider>
+
+        <!-- Login Option -->
+        <div class="login-option" *ngIf="!registrationSuccess()">
+            <p class="login-prompt">
+                Already have an account?
+                <button mat-button color="primary" (click)="onBackToLogin()" class="login-link">
+                    Sign In
+                </button>
+            </p>
+        </div>
+    </mat-card>
+
+    <!-- Footer -->
+    <div class="register-footer">
+        <p class="footer-text">
+            Powered by blockchain technology • Secure • Compliant
+        </p>
+        <div class="footer-links">
+            <a href="#" class="footer-link">Privacy Policy</a>
+            <span class="divider">•</span>
+            <a href="#" class="footer-link">Terms of Service</a>
+            <span class="divider">•</span>
+            <a href="#" class="footer-link">Security</a>
+        </div>
+    </div>
+</div>

@@ -21,6 +21,20 @@
         <div class="form-section">
             <h2 class="form-title">Sign In to Your Account</h2>
 
+            <!-- API Error Messages -->
+            <div class="api-error-section" *ngIf="apiErrors().length > 0">
+                <mat-icon class="error-icon">error</mat-icon>
+                <div class="error-content">
+                    <strong>Login Failed</strong>
+                    <ul class="error-list" *ngIf="apiErrors().length > 1; else singleError">
+                        <li *ngFor="let error of apiErrors()">{{ error }}</li>
+                    </ul>
+                    <ng-template #singleError>
+                        <p class="single-error-message">{{ apiErrors()[0] }}</p>
+                    </ng-template>
+                </div>
+            </div>
+
             <!-- Account Locked Warning -->
             <div class="account-locked-warning" *ngIf="isAccountLocked()">
                 <mat-icon class="warning-icon">lock</mat-icon>
@@ -67,7 +81,7 @@
                     <mat-hint>Enter the 6-digit code from your authenticator app (if enabled)</mat-hint>
                 </mat-form-field>
 
-                <!-- Remember Me -->
+                <!-- Remember Me and Forgot Password -->
                 <div class="form-options">
                     <mat-checkbox formControlName="rememberMe" color="primary">
                         Remember me for 30 days
@@ -82,7 +96,10 @@
                 <!-- Submit Button -->
                 <button mat-raised-button color="primary" type="submit" class="login-button full-width"
                     [disabled]="!canSubmit">
-                    <span *ngIf="!isLoading(); else loadingTemplate">Sign In</span>
+                    <span *ngIf="!isLoading(); else loadingTemplate">
+                        <mat-icon>login</mat-icon>
+                        Sign In
+                    </span>
                     <ng-template #loadingTemplate>
                         <mat-spinner diameter="20" color="accent"></mat-spinner>
                         <span class="loading-text">Signing in...</span>
