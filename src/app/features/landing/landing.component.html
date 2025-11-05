@@ -1,0 +1,518 @@
+<div class="landing-page">
+  <!-- Navigation Header -->
+  <header class="landing-header">
+    <nav class="container nav-container">
+      <div class="nav-content">
+        <div class="logo-section">
+          <div class="logo-placeholder">🏦</div>
+          <span class="logo-text">BlockTrade</span>
+        </div>
+
+        <div class="nav-links">
+          <a href="#features" class="nav-link">Features</a>
+          <a href="#how-it-works" class="nav-link">How It Works</a>
+          <a href="#organizations" class="nav-link">Organizations</a>
+          <a href="#contact" class="nav-link">Contact</a>
+        </div>
+
+        <div class="auth-buttons">
+          <button (click)="navigateToLogin()" class="btn btn-secondary">
+            Sign In
+          </button>
+          <button (click)="navigateToRegister()" class="btn btn-primary">
+            Get Started
+          </button>
+        </div>
+
+        <!-- Mobile menu button -->
+        <button class="mobile-menu-btn" (click)="toggleMobileMenu()">
+          <span class="hamburger"></span>
+        </button>
+      </div>
+
+      <!-- Mobile Navigation -->
+      <div class="mobile-nav" [class.active]="mobileMenuOpen">
+        <a href="#features" class="mobile-nav-link" (click)="closeMobileMenu()">Features</a>
+        <a href="#how-it-works" class="mobile-nav-link" (click)="closeMobileMenu()">How It Works</a>
+        <a href="#organizations" class="mobile-nav-link" (click)="closeMobileMenu()">Organizations</a>
+        <a href="#contact" class="mobile-nav-link" (click)="closeMobileMenu()">Contact</a>
+        <div class="mobile-auth-buttons">
+          <button (click)="navigateToLogin()" class="btn btn-secondary btn-full">Sign In</button>
+          <button (click)="navigateToRegister()" class="btn btn-primary btn-full">Get Started</button>
+        </div>
+      </div>
+    </nav>
+  </header>
+
+  <!-- Hero Section -->
+  <section class="hero-section">
+    <div class="hero-background">
+      <div class="hero-shapes">
+        <div class="shape shape-1"></div>
+        <div class="shape shape-2"></div>
+        <div class="shape shape-3"></div>
+      </div>
+    </div>
+    <div class="container hero-container">
+      <div class="hero-content">
+        <div class="hero-badge">
+          <span class="badge-text">🚀 Now Supporting Multi-Currency Transactions</span>
+        </div>
+        <h1 class="hero-title">
+          Revolutionize Trade Finance with
+          <span class="gradient-text">Blockchain Technology</span>
+        </h1>
+        <p class="hero-subtitle">
+          Secure, transparent, and efficient Letter of Credit processing for banks,
+          corporates, and financial institutions worldwide. Experience the future of trade finance.
+        </p>
+
+        <div class="hero-actions">
+          <button (click)="navigateToRegister()" class="btn btn-primary btn-large btn-glow">
+            <span class="btn-text">Start Your Journey</span>
+            <svg class="btn-icon-right" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 7l5 5m0 0l-5 5m5-5H6" />
+            </svg>
+          </button>
+          <button (click)="showDemo()" class="btn btn-outline btn-large btn-glass">
+            <svg class="btn-icon-left" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+              <polygon points="5,3 19,12 5,21" />
+            </svg>
+            <span class="btn-text">Watch Demo</span>
+          </button>
+        </div>
+
+        <!-- Trust Indicators -->
+        <div class="trust-indicators">
+          <div class="trust-badges">
+            <div class="trust-badge">
+              <svg class="trust-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
+              </svg>
+              <span>ISO 27001 Certified</span>
+            </div>
+            <div class="trust-badge">
+              <svg class="trust-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                  d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
+              </svg>
+              <span>Bank-Grade Security</span>
+            </div>
+            <div class="trust-badge">
+              <svg class="trust-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z" />
+              </svg>
+              <span>99.9% Uptime</span>
+            </div>
+          </div>
+
+          <div class="stats-grid">
+            <div class="stat-item">
+              <div class="stat-number">{{ stats.totalTransactions }}+</div>
+              <div class="stat-label">Transactions Processed</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-number">${{ stats.totalVolume }}B+</div>
+              <div class="stat-label">Transaction Volume</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-number">{{ stats.activeUsers }}+</div>
+              <div class="stat-label">Active Users</div>
+            </div>
+            <div class="stat-item">
+              <div class="stat-number">{{ stats.partneredBanks }}+</div>
+              <div class="stat-label">Partner Banks</div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- How It Works Section -->
+  <section id="how-it-works" class="how-it-works-section">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">How BlockTrade Works</h2>
+        <p class="section-subtitle">
+          Simple, secure, and streamlined process for all your trade finance needs
+        </p>
+      </div>
+
+      <div class="process-steps">
+        <div class="step-item" *ngFor="let step of processSteps; let i = index">
+          <div class="step-number">{{ i + 1 }}</div>
+          <div class="step-content">
+            <div class="step-icon">{{ step.icon }}</div>
+            <h3 class="step-title">{{ step.title }}</h3>
+            <p class="step-description">{{ step.description }}</p>
+          </div>
+          <div class="step-connector" *ngIf="i < processSteps.length - 1"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Organization Types Section -->
+  <section id="organizations" class="organization-types-section">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">Built for Every Financial Entity</h2>
+        <p class="section-subtitle">
+          Tailored solutions for different types of organizations in trade finance
+        </p>
+      </div>
+
+      <div class="organization-grid">
+        <div *ngFor="let org of organizationTypes" class="organization-card" [class]="'organization-card--' + org.type">
+          <div class="card-icon">{{ org.icon }}</div>
+          <h3 class="card-title">{{ org.title }}</h3>
+          <p class="card-description">{{ org.description }}</p>
+          <ul class="card-features">
+            <li *ngFor="let feature of org.features" class="feature-item">
+              <svg class="feature-check" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd"
+                  d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z"
+                  clip-rule="evenodd" />
+              </svg>
+              {{ feature }}
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Features Section -->
+  <section id="features" class="features-section">
+    <div class="container">
+      <div class="section-header">
+        <h2 class="section-title">Why Choose BlockTrade?</h2>
+        <p class="section-subtitle">
+          Advanced features designed for modern trade finance
+        </p>
+      </div>
+
+      <div class="features-grid">
+        <div *ngFor="let feature of features" class="feature-card">
+          <div class="feature-icon">{{ feature.icon }}</div>
+          <h3 class="feature-title">{{ feature.title }}</h3>
+          <p class="feature-description">{{ feature.description }}</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- Footer -->
+  <footer class="landing-footer">
+    <div class="container">
+      <div class="footer-content">
+        <div class="footer-section">
+          <div class="footer-logo">
+            <div class="logo-placeholder">🏦</div>
+            <span class="footer-logo-text">BlockTrade</span>
+          </div>
+          <p class="footer-description">
+            Transforming trade finance through blockchain technology,
+            making international trade more secure and efficient.
+          </p>
+        </div>
+
+        <div class="footer-links">
+          <div class="link-group">
+            <h4>Product</h4>
+            <a href="#features">Features</a>
+            <a href="#pricing">Pricing</a>
+            <a href="#demo">Demo</a>
+          </div>
+          <div class="link-group">
+            <h4>Company</h4>
+            <a href="#about">About</a>
+            <a href="#careers">Careers</a>
+            <a href="#contact">Contact</a>
+          </div>
+          <div class="link-group">
+            <h4>Support</h4>
+            <a href="#docs">Documentation</a>
+            <a href="#help">Help Center</a>
+            <a href="#api">API Reference</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="footer-bottom">
+        <p>&copy; 2025 BlockTrade. All rights reserved.</p>
+        <div class="footer-legal">
+          <a href="#privacy">Privacy Policy</a>
+          <a href="#terms">Terms of Service</a>
+        </div>
+      </div>
+    </div>
+  </footer>
+
+  <!-- Demo Modal -->
+  <div class="demo-modal-overlay" [class.active]="showDemoModal" (click)="closeDemoModal()">
+    <div class="demo-modal" (click)="$event.stopPropagation()">
+      <div class="demo-modal-header">
+        <h3>BlockTrade Platform Demo</h3>
+        <button class="close-btn" (click)="closeDemoModal()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+      <div class="demo-modal-content">
+        <div class="demo-placeholder">
+          <div class="demo-icon">🎥</div>
+          <h4>Interactive Demo</h4>
+          <p>Experience the power of blockchain-powered trade finance</p>
+          <div class="demo-features">
+            <div class="demo-feature">
+              <span class="demo-step">1</span>
+              <span>Create Letter of Credit</span>
+            </div>
+            <div class="demo-feature">
+              <span class="demo-step">2</span>
+              <span>Blockchain Verification</span>
+            </div>
+            <div class="demo-feature">
+              <span class="demo-step">3</span>
+              <span>Real-time Tracking</span>
+            </div>
+            <div class="demo-feature">
+              <span class="demo-step">4</span>
+              <span>Instant Settlement</span>
+            </div>
+          </div>
+          <div class="demo-actions">
+            <button class="btn btn-primary" (click)="navigateToRegister()">
+              Start Free Trial
+            </button>
+            <button class="btn btn-secondary" (click)="closeDemoModal()">
+              Close Demo
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Authentication Modal -->
+  <div class="auth-modal-overlay" [class.active]="showAuthModal" (click)="closeAuthModal()">
+    <div class="auth-modal" (click)="$event.stopPropagation()">
+      <div class="auth-modal-header">
+        <div class="logo-section">
+          <div class="logo-icon">🏦</div>
+          <h2 class="logo-title">BlockTrade</h2>
+        </div>
+        <button class="close-btn" (click)="closeAuthModal()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor">
+            <line x1="18" y1="6" x2="6" y2="18"></line>
+            <line x1="6" y1="6" x2="18" y2="18"></line>
+          </svg>
+        </button>
+      </div>
+
+      <!-- Auth Mode Toggle -->
+      <div class="auth-mode-toggle">
+        <button class="toggle-btn" [class.active]="authMode === 'login'" (click)="switchAuthMode('login')">
+          Sign In
+        </button>
+        <button class="toggle-btn" [class.active]="authMode === 'register'" (click)="switchAuthMode('register')">
+          Get Started
+        </button>
+      </div>
+
+      <!-- Success/Error Messages -->
+      <div class="message-container" *ngIf="message">
+        <div class="message" [class.success]="message.type === 'success'" [class.error]="message.type === 'error'">
+          <span class="message-icon">
+            <span *ngIf="message.type === 'success'">✅</span>
+            <span *ngIf="message.type === 'error'">❌</span>
+          </span>
+          {{ message.text }}
+        </div>
+      </div>
+
+      <!-- Login Form -->
+      <div *ngIf="authMode === 'login'" class="auth-form-container">
+        <form [formGroup]="loginForm" (ngSubmit)="onLoginSubmit()" class="auth-form">
+          <div class="form-group">
+            <label for="email" class="form-label">Email Address</label>
+            <input id="email" type="email" formControlName="email" class="form-input"
+              [class.error]="isFieldInvalid('email')" placeholder="Enter your email" />
+            <div class="error-message" *ngIf="isFieldInvalid('email')">
+              <span *ngIf="loginForm.get('email')?.errors?.['required']">Email is required</span>
+              <span *ngIf="loginForm.get('email')?.errors?.['email']">Please enter a valid email</span>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="password" class="form-label">Password</label>
+            <div class="password-input-container">
+              <input id="password" [type]="showPassword ? 'text' : 'password'" formControlName="password"
+                class="form-input" [class.error]="isFieldInvalid('password')" placeholder="Enter your password" />
+              <button type="button" class="password-toggle" (click)="togglePassword()">
+                <span *ngIf="!showPassword">👁️</span>
+                <span *ngIf="showPassword">🙈</span>
+              </button>
+            </div>
+            <div class="error-message" *ngIf="isFieldInvalid('password')">
+              <span *ngIf="loginForm.get('password')?.errors?.['required']">Password is required</span>
+              <span *ngIf="loginForm.get('password')?.errors?.['minlength']">Password must be at least 6
+                characters</span>
+            </div>
+          </div>
+
+          <div class="form-options">
+            <label class="checkbox-container">
+              <input type="checkbox" formControlName="rememberMe" />
+              <span class="checkmark"></span>
+              Remember me
+            </label>
+            <a href="#" class="forgot-link">Forgot password?</a>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-full" [disabled]="loginForm.invalid || isLoading">
+            <span *ngIf="!isLoading">Sign In</span>
+            <span *ngIf="isLoading" class="loading-spinner">
+              <span class="spinner"></span>
+              Signing in...
+            </span>
+          </button>
+        </form>
+      </div>
+
+      <!-- Registration Form -->
+      <div *ngIf="authMode === 'register'" class="auth-form-container">
+        <form [formGroup]="registerForm" (ngSubmit)="onRegisterSubmit()" class="auth-form">
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="firstName">First Name *</label>
+              <input type="text" id="firstName" class="form-input" formControlName="firstName"
+                placeholder="Enter your first name" [class.error]="isFieldInvalid('firstName', registerForm)">
+              <div *ngIf="isFieldInvalid('firstName', registerForm)" class="error-message">
+                First name is required
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="lastName">Last Name *</label>
+              <input type="text" id="lastName" class="form-input" formControlName="lastName"
+                placeholder="Enter your last name" [class.error]="isFieldInvalid('lastName', registerForm)">
+              <div *ngIf="isFieldInvalid('lastName', registerForm)" class="error-message">
+                Last name is required
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label" for="email">Email Address *</label>
+            <input type="email" id="email" class="form-input" formControlName="email"
+              placeholder="Enter your email address" [class.error]="isFieldInvalid('email', registerForm)">
+            <div *ngIf="isFieldInvalid('email', registerForm)" class="error-message">
+              <span *ngIf="registerForm.get('email')?.errors?.['required']">Email is required</span>
+              <span *ngIf="registerForm.get('email')?.errors?.['email']">Please enter a valid email</span>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="phone">Phone Number *</label>
+              <input type="tel" id="phone" class="form-input" formControlName="phone"
+                placeholder="Enter your phone number" [class.error]="isFieldInvalid('phone', registerForm)">
+              <div *ngIf="isFieldInvalid('phone', registerForm)" class="error-message">
+                Phone number is required
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="username">Username *</label>
+              <input type="text" id="username" class="form-input" formControlName="username"
+                placeholder="Choose a username" [class.error]="isFieldInvalid('username', registerForm)">
+              <div *ngIf="isFieldInvalid('username', registerForm)" class="error-message">
+                Username is required
+              </div>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="organizationName">Organization Name *</label>
+              <input type="text" id="organizationName" class="form-input" formControlName="organizationName"
+                placeholder="Enter your organization name"
+                [class.error]="isFieldInvalid('organizationName', registerForm)">
+              <div *ngIf="isFieldInvalid('organizationName', registerForm)" class="error-message">
+                Organization name is required
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="organizationType">Organization Type *</label>
+              <select id="organizationType" class="form-input" formControlName="organizationType"
+                [class.error]="isFieldInvalid('organizationType', registerForm)">
+                <option value="">Select organization type</option>
+                <option *ngFor="let type of registrationOrgTypes" [value]="type.value">
+                  {{ type.label }}
+                </option>
+              </select>
+              <div *ngIf="isFieldInvalid('organizationType', registerForm)" class="error-message">
+                Organization type is required
+              </div>
+            </div>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group">
+              <label class="form-label" for="password">Password *</label>
+              <div class="password-input-container">
+                <input [type]="showPassword ? 'text' : 'password'" id="password" class="form-input"
+                  formControlName="password" placeholder="Create a strong password"
+                  [class.error]="isFieldInvalid('password', registerForm)">
+                <button type="button" class="password-toggle" (click)="togglePassword()">
+                  {{ showPassword ? '🙈' : '👁️' }}
+                </button>
+              </div>
+              <div *ngIf="isFieldInvalid('password', registerForm)" class="error-message">
+                <span *ngIf="registerForm.get('password')?.errors?.['required']">Password is required</span>
+                <span *ngIf="registerForm.get('password')?.errors?.['minlength']">Password must be at least 6
+                  characters</span>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="form-label" for="confirmPassword">Confirm Password *</label>
+              <input type="password" id="confirmPassword" class="form-input" formControlName="confirmPassword"
+                placeholder="Confirm your password" [class.error]="isFieldInvalid('confirmPassword', registerForm)">
+              <div *ngIf="isFieldInvalid('confirmPassword', registerForm)" class="error-message">
+                <span *ngIf="registerForm.get('confirmPassword')?.errors?.['required']">Password confirmation is
+                  required</span>
+                <span *ngIf="registerForm.get('confirmPassword')?.errors?.['passwordMismatch']">Passwords do not
+                  match</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="checkbox-container">
+              <input type="checkbox" id="acceptTerms" formControlName="acceptTerms"
+                [class.error]="isFieldInvalid('acceptTerms', registerForm)">
+              <span class="checkmark" [class.error]="isFieldInvalid('acceptTerms', registerForm)"></span>
+              <span class="checkbox-text">I accept the <a href="#" class="link">Terms and Conditions</a> and <a href="#"
+                  class="link">Privacy Policy</a> *</span>
+            </label>
+            <div *ngIf="isFieldInvalid('acceptTerms', registerForm)" class="error-message">
+              You must accept the terms and conditions
+            </div>
+          </div>
+
+          <button type="submit" class="btn btn-primary btn-full" [disabled]="registerForm.invalid || isLoading">
+            <span *ngIf="!isLoading">Create Account</span>
+            <div *ngIf="isLoading" class="loading-spinner">
+              <div class="spinner"></div>
+              <span>Creating Account...</span>
+            </div>
+          </button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

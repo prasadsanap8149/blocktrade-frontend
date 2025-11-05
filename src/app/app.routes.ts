@@ -5,8 +5,8 @@ import { noAuthGuard } from './core/guards/no-auth.guard';
 export const routes: Routes = [
   {
     path: '',
-    redirectTo: '/dashboard',
-    pathMatch: 'full'
+    loadChildren: () => import('./features/landing/landing.routes').then(m => m.landingRoutes),
+    data: { preload: true }
   },
   {
     path: 'auth',

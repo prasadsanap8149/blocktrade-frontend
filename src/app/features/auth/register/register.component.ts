@@ -1,18 +1,7 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, AbstractControl, ValidationErrors } from '@angular/forms';
-import { Router, ActivatedRoute } from '@angular/router';
+import { Router, ActivatedRoute, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { MatCardModule } from '@angular/material/card';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatCheckboxModule } from '@angular/material/checkbox';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatDividerModule } from '@angular/material/divider';
-import { MatSelectModule } from '@angular/material/select';
-import { MatStepperModule } from '@angular/material/stepper';
-import { MatSnackBarModule } from '@angular/material/snack-bar';
 
 import { AuthService } from '../../../core/services/auth.service';
 import { NotificationService } from '../../../core/services/notification.service';
@@ -26,35 +15,23 @@ import { UserRegistration, OrganizationType, UserRole } from '../../../core/mode
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    MatCardModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatButtonModule,
-    MatIconModule,
-    MatCheckboxModule,
-    MatProgressSpinnerModule,
-    MatDividerModule,
-    MatSelectModule,
-    MatStepperModule,
-    MatSnackBarModule
+    RouterModule
   ],
   templateUrl: './register.component.html',
-  styleUrl: './register.component.css'
+  styleUrl: './register.component.css',
+  host: {
+    'class': 'auth-page full-width-layout'
+  }
 })
 export class RegisterComponent implements OnInit {
-  private readonly formBuilder = inject(FormBuilder);
-  private readonly authService = inject(AuthService);
-  private readonly router = inject(Router);
-  private readonly route = inject(ActivatedRoute);
-  private readonly notificationService = inject(NotificationService);
-
-  // Signals for reactive state management
-  isLoading = signal(false);
-  hidePassword = signal(true);
-  hideConfirmPassword = signal(true);
-  currentStep = signal(0);
-  registrationSuccess = signal(false);
-  apiErrors = signal<string[]>([]);
+  
+  // Reactive state management using traditional properties
+  isLoading = false;
+  hidePassword = true;
+  hideConfirmPassword = true;
+  currentStep = 0;
+  registrationSuccess = false;
+  apiErrors: string[] = [];
   
   personalInfoForm!: FormGroup;
   organizationForm!: FormGroup;
@@ -74,6 +51,14 @@ export class RegisterComponent implements OnInit {
     { value: OrganizationType.LOGISTICS, label: 'Logistics' },
     { value: OrganizationType.INSURANCE, label: 'Insurance' }
   ];
+
+  constructor(
+    private formBuilder: FormBuilder,
+    private authService: AuthService,
+    private router: Router,
+    private route: ActivatedRoute,
+    private notificationService: NotificationService
+  ) {}
 
   ngOnInit(): void {
     this.initializeForms();
@@ -164,20 +149,20 @@ export class RegisterComponent implements OnInit {
   nextStep(): void {
     const currentStepForm = this.getCurrentStepForm();
     if (currentStepForm.valid) {
-      this.currentStep.update(step => step + 1);
-      this.apiErrors.set([]);
+      this.currentStep = this.currentStep + 1;
+      this.apiErrors = [];
     } else {
       this.markFormGroupTouched(currentStepForm);
     }
   }
 
   previousStep(): void {
-    this.currentStep.update(step => Math.max(0, step - 1));
-    this.apiErrors.set([]);
+    this.currentStep = Math.max(0, this.currentStep - 1);
+    this.apiErrors = [];
   }
 
   private getCurrentStepForm(): FormGroup {
-    switch (this.currentStep()) {
+    switch (this.currentStep) {
       case 0: return this.personalInfoForm;
       case 1: return this.organizationForm;
       case 2: return this.securityForm;
@@ -186,7 +171,7 @@ export class RegisterComponent implements OnInit {
   }
 
   onSubmit(): void {
-    if (this.isAllFormsValid() && !this.isLoading()) {
+    if (this.isAllFormsValid() && !this.isLoading) {
       this.performRegistration();
     } else {
       this.markAllFormsTouched();
@@ -200,8 +185,8 @@ export class RegisterComponent implements OnInit {
   }
 
   private performRegistration(): void {
-    this.isLoading.set(true);
-    this.apiErrors.set([]);
+    this.isLoading = true;
+    this.apiErrors = [];
 
     const registrationData: UserRegistration = {
       // Personal Information
@@ -239,13 +224,13 @@ export class RegisterComponent implements OnInit {
         this.handleRegistrationError(error);
       },
       complete: () => {
-        this.isLoading.set(false);
+        this.isLoading = false;
       }
     });
   }
 
   private handleRegistrationSuccess(response: any): void {
-    this.registrationSuccess.set(true);
+    this.registrationSuccess = true;
     this.notificationService.success('Registration successful! Welcome to BlockTrade.');
     
     // Auto-redirect after a short delay to show success state
@@ -283,7 +268,7 @@ export class RegisterComponent implements OnInit {
       }
     }
     
-    this.apiErrors.set(errors);
+    this.apiErrors = errors;
     this.notificationService.error(errors[0] || 'Registration failed');
   }
 
@@ -306,11 +291,11 @@ export class RegisterComponent implements OnInit {
   }
 
   togglePasswordVisibility(): void {
-    this.hidePassword.set(!this.hidePassword());
+    this.hidePassword = !this.hidePassword;
   }
 
   toggleConfirmPasswordVisibility(): void {
-    this.hideConfirmPassword.set(!this.hideConfirmPassword());
+    this.hideConfirmPassword = !this.hideConfirmPassword;
   }
 
   onBackToLogin(): void {
@@ -403,7 +388,7 @@ export class RegisterComponent implements OnInit {
   }
 
   get canSubmit(): boolean {
-    return this.isAllFormsValid() && !this.isLoading();
+    return this.isAllFormsValid() && !this.isLoading;
   }
 
   get stepTitles(): string[] {

@@ -68,7 +68,10 @@ interface QuickAction {
     MatChipsModule
   ],
   templateUrl: './dashboard.component.html',
-  styleUrl: './dashboard.component.css'
+  styleUrl: './dashboard.component.css',
+  host: {
+    'class': 'app-page'
+  }
 })
 export class DashboardComponent implements OnInit {
   private readonly authService = inject(AuthService);

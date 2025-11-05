@@ -1,19 +1,9 @@
-import { Component, OnInit, inject, signal } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
-import { Router, ActivatedRoute } from '@angular/router';
+import { Router, ActivatedRoute, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { MatCardModule } from '@angular/material/card';
-import { MatFormFieldModule } from '@angular/material/form-field';
-import { MatInputModule } from '@angular/material/input';
-import { MatButtonModule } from '@angular/material/button';
-import { MatIconModule } from '@angular/material/icon';
-import { MatCheckboxModule } from '@angular/material/checkbox';
-import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
-import { MatDividerModule } from '@angular/material/divider';
 
 import { AuthService } from '../../../core/services/auth.service';
-import { MESSAGES } from '../../../shared/constants/messages.constants';
-import { APP_CONFIG } from '../../../shared/constants/app-config.constants';
 import { UserLogin } from '../../../core/models/user.model';
 
 @Component({
@@ -22,38 +12,29 @@ import { UserLogin } from '../../../core/models/user.model';
   imports: [
     CommonModule,
     ReactiveFormsModule,
-    MatCardModule,
-    MatFormFieldModule,
-    MatInputModule,
-    MatButtonModule,
-    MatIconModule,
-    MatCheckboxModule,
-    MatProgressSpinnerModule,
-    MatDividerModule
+    RouterModule
   ],
   templateUrl: './login.component.html',
-  styleUrl: './login.component.css'
+  styleUrls: ['./login.component.css'],
+  host: {
+    'class': 'auth-page full-width-layout'
+  }
 })
 export class LoginComponent implements OnInit {
-  private readonly formBuilder = inject(FormBuilder);
-  private readonly authService = inject(AuthService);
-  private readonly router = inject(Router);
-  private readonly route = inject(ActivatedRoute);
-
-  // Signals for reactive state management
-  isLoading = signal(false);
-  hidePassword = signal(true);
-  loginAttempts = signal(0);
-  isAccountLocked = signal(false);
-  apiErrors = signal<string[]>([]);
-  
   loginForm!: FormGroup;
+  isLoading = false;
+  showPassword = false;
+  loginAttempts = 0;
+  maxAttempts = 3;
+  message: { type: 'success' | 'error'; text: string } | null = null;
   returnUrl = '/dashboard';
 
-  // Constants for template
-  readonly MESSAGES = MESSAGES;
-  readonly APP_NAME = APP_CONFIG.APP_NAME;
-  readonly MAX_LOGIN_ATTEMPTS = APP_CONFIG.SECURITY.MAX_LOGIN_ATTEMPTS;
+  constructor(
+    private formBuilder: FormBuilder,
+    private authService: AuthService,
+    private router: Router,
+    private route: ActivatedRoute
+  ) {}
 
   ngOnInit(): void {
     this.initializeForm();
@@ -63,16 +44,8 @@ export class LoginComponent implements OnInit {
 
   private initializeForm(): void {
     this.loginForm = this.formBuilder.group({
-      username: ['', [
-        Validators.required,
-        Validators.minLength(3),
-        Validators.maxLength(50)
-      ]],
-      password: ['', [
-        Validators.required,
-        Validators.minLength(8)
-      ]],
-      mfaCode: [''],
+      email: ['', [Validators.required, Validators.email]],
+      password: ['', [Validators.required, Validators.minLength(6)]],
       rememberMe: [false]
     });
   }
@@ -88,107 +61,67 @@ export class LoginComponent implements OnInit {
   }
 
   onSubmit(): void {
-    if (this.loginForm.valid && !this.isLoading() && !this.isAccountLocked()) {
-      // Immediately set loading to prevent multiple submissions
-      this.isLoading.set(true);
+    if (this.loginForm.valid && !this.isLoading) {
+      this.isLoading = true;
+      this.message = null;
       this.performLogin();
-    } else if (!this.loginForm.valid) {
+    } else {
       this.markFormGroupTouched();
     }
   }
 
   private performLogin(): void {
-    // Clear any previous errors
-    this.apiErrors.set([]);
-
     const loginData: UserLogin = {
-      username: this.loginForm.get('username')?.value.trim(),
+      username: this.loginForm.get('email')?.value.trim(),
       password: this.loginForm.get('password')?.value,
-      mfaCode: this.loginForm.get('mfaCode')?.value || undefined,
       rememberMe: this.loginForm.get('rememberMe')?.value || false
     };
 
     this.authService.login(loginData).subscribe({
-      next: (response) => {
+      next: (response: any) => {
         this.handleLoginSuccess();
       },
-      error: (error) => {
+      error: (error: any) => {
         this.handleLoginError(error);
       },
       complete: () => {
-        this.isLoading.set(false);
+        this.isLoading = false;
       }
     });
   }
 
   private handleLoginSuccess(): void {
-    this.loginAttempts.set(0);
-    this.apiErrors.set([]);
-    this.router.navigate([this.returnUrl]);
+    this.loginAttempts = 0;
+    this.message = { type: 'success', text: 'Login successful! Redirecting...' };
+    setTimeout(() => {
+      this.router.navigate([this.returnUrl]);
+    }, 1000);
   }
 
   private handleLoginError(error: any): void {
-    const newAttempts = this.loginAttempts() + 1;
-    this.loginAttempts.set(newAttempts);
-
-    const errors: string[] = [];
+    this.loginAttempts++;
     
-    if (error.error?.details && Array.isArray(error.error.details)) {
-      // Handle validation errors from server
-      error.error.details.forEach((detail: any) => {
-        if (detail.message) {
-          errors.push(detail.message);
-        }
-      });
-    } else if (error.message) {
-      errors.push(error.message);
-    } else {
-      // Default error based on status code
-      switch (error.status) {
-        case 400:
-          errors.push('Invalid login credentials. Please check your username and password.');
-          break;
-        case 401:
-          errors.push('Invalid username or password.');
-          break;
-        case 403:
-          errors.push('Your account has been locked. Please contact support.');
-          break;
-        case 422:
-          errors.push('Please check your input and try again.');
-          break;
-        case 429:
-          errors.push('Too many login attempts. Please try again later.');
-          break;
-        case 500:
-          errors.push('Server error. Please try again later.');
-          break;
-        default:
-          errors.push('Login failed. Please try again.');
-      }
+    let errorMessage = 'Login failed. Please try again.';
+    
+    if (error.status === 401) {
+      errorMessage = 'Invalid email or password.';
+    } else if (error.status === 403) {
+      errorMessage = 'Account is locked. Please contact support.';
+    } else if (error.status === 429) {
+      errorMessage = 'Too many login attempts. Please try again later.';
+    } else if (error.error?.message) {
+      errorMessage = error.error.message;
     }
     
-    this.apiErrors.set(errors);
-
-    if (newAttempts >= this.MAX_LOGIN_ATTEMPTS) {
-      this.isAccountLocked.set(true);
-      this.lockAccount();
-    }
-
-    // Reset form password field
+    this.message = { type: 'error', text: errorMessage };
+    
+    // Reset password field
     this.loginForm.get('password')?.setValue('');
-    this.loginForm.get('mfaCode')?.setValue('');
-  }
-
-  private lockAccount(): void {
-    this.loginForm.disable();
     
-    // Auto-unlock after lockout duration
-    setTimeout(() => {
-      this.isAccountLocked.set(false);
-      this.loginAttempts.set(0);
-      this.loginForm.enable();
-    }, APP_CONFIG.SECURITY.LOCKOUT_DURATION);
+    if (this.loginAttempts >= this.maxAttempts) {
+      this.loginForm.disable();
+      this.message = { type: 'error', text: 'Account temporarily locked due to multiple failed attempts.' };
+    }
   }
 
   private markFormGroupTouched(): void {
@@ -198,45 +131,22 @@ export class LoginComponent implements OnInit {
     });
   }
 
-  togglePasswordVisibility(): void {
-    this.hidePassword.set(!this.hidePassword());
+  togglePassword(): void {
+    this.showPassword = !this.showPassword;
   }
 
-  onForgotPassword(): void {
-    this.router.navigate(['/auth/forgot-password']);
+  isFieldInvalid(fieldName: string): boolean {
+    const field = this.loginForm.get(fieldName);
+    return !!(field && field.invalid && (field.dirty || field.touched));
   }
 
-  onCreateAccount(): void {
-    this.router.navigate(['/auth/register'], { 
-      queryParams: { returnUrl: this.returnUrl } 
-    });
+  signInWithGoogle(): void {
+    // Implement Google OAuth
+    console.log('Google Sign In');
   }
 
-  // Getter methods for template
-  get usernameError(): string | null {
-    const control = this.loginForm.get('username');
-    if (control?.touched && control?.errors) {
-      if (control.errors['required']) return MESSAGES.VALIDATION.EMAIL_REQUIRED;
-      if (control.errors['minlength']) return 'Username must be at least 3 characters';
-      if (control.errors['maxlength']) return 'Username cannot exceed 50 characters';
-    }
-    return null;
-  }
-
-  get passwordError(): string | null {
-    const control = this.loginForm.get('password');
-    if (control?.touched && control?.errors) {
-      if (control.errors['required']) return MESSAGES.VALIDATION.PASSWORD_REQUIRED;
-      if (control.errors['minlength']) return MESSAGES.VALIDATION.PASSWORD_MIN_LENGTH;
-    }
-    return null;
-  }
-
-  get remainingAttempts(): number {
-    return Math.max(0, this.MAX_LOGIN_ATTEMPTS - this.loginAttempts());
-  }
-
-  get canSubmit(): boolean {
-    return this.loginForm.valid && !this.isLoading() && !this.isAccountLocked();
+  signInWithMicrosoft(): void {
+    // Implement Microsoft OAuth
+    console.log('Microsoft Sign In');
   }
 }
