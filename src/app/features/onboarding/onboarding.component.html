@@ -1,0 +1,374 @@
+<div class="onboarding-container">
+    <!-- Progress Header -->
+    <div class="onboarding-header">
+        <div class="container">
+            <div class="progress-section">
+                <h1 class="onboarding-title">Welcome to BlockTrade!</h1>
+                <p class="onboarding-subtitle">Let's get you set up with your blockchain-powered trade finance platform
+                </p>
+
+                <!-- Progress Bar -->
+                <div class="progress-bar">
+                    <div class="progress-track">
+                        <div class="progress-fill" [style.width.%]="progressPercentage"></div>
+                    </div>
+                    <div class="progress-steps">
+                        <div *ngFor="let step of steps" class="progress-step" [class.completed]="step.completed"
+                            [class.current]="step.current">
+                            <div class="step-circle">
+                                <i *ngIf="step.completed" class="fas fa-check"></i>
+                                <span *ngIf="!step.completed">{{ step.number }}</span>
+                            </div>
+                            <div class="step-label">{{ step.title }}</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Step Content -->
+    <div class="onboarding-content">
+        <div class="container">
+            <div class="step-card">
+                <!-- Step 1: Organization Setup -->
+                <div *ngIf="currentStep === 1" class="step-content">
+                    <div class="step-header">
+                        <h2>Organization Setup</h2>
+                        <p>Configure your role and department within your organization</p>
+                    </div>
+
+                    <form [formGroup]="step1Form" (ngSubmit)="completeStep(1)" class="onboarding-form">
+                        <div class="form-group">
+                            <label for="organizationRole">Your Role *</label>
+                            <select id="organizationRole" formControlName="organizationRole" class="form-control">
+                                <option value="">Select your role</option>
+                                <option *ngFor="let role of organizationRoles" [value]="role.value">{{ role.label }}
+                                </option>
+                            </select>
+                            <div *ngIf="isFieldInvalid('organizationRole', step1Form)" class="error-message">
+                                Please select your role
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="department">Department *</label>
+                            <input id="department" formControlName="department" type="text" class="form-control"
+                                placeholder="e.g., Trade Finance, Operations">
+                            <div *ngIf="isFieldInvalid('department', step1Form)" class="error-message">
+                                Please enter your department
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="reportingManager">Reporting Manager</label>
+                            <input id="reportingManager" formControlName="reportingManager" type="text"
+                                class="form-control" placeholder="Manager's name">
+                        </div>
+
+                        <div class="form-group">
+                            <label for="projectAssignments">Project Assignments</label>
+                            <textarea id="projectAssignments" formControlName="projectAssignments" class="form-control"
+                                rows="3" placeholder="Describe your main responsibilities and projects"></textarea>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary" [disabled]="!step1Form.valid || isLoading">
+                                <span *ngIf="isLoading" class="spinner"></span>
+                                Continue to Profile Setup
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Step 2: Profile Completion -->
+                <div *ngIf="currentStep === 2" class="step-content">
+                    <div class="step-header">
+                        <h2>Complete Your Profile</h2>
+                        <p>Add your contact information and personal details</p>
+                    </div>
+
+                    <form [formGroup]="step2Form" (ngSubmit)="completeStep(2)" class="onboarding-form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="phone">Phone Number *</label>
+                                <input id="phone" formControlName="phone" type="tel" class="form-control"
+                                    placeholder="+1 (555) 123-4567">
+                                <div *ngIf="isFieldInvalid('phone', step2Form)" class="error-message">
+                                    Please enter a valid phone number
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="timezone">Timezone *</label>
+                                <select id="timezone" formControlName="timezone" class="form-control">
+                                    <option value="">Select timezone</option>
+                                    <option *ngFor="let tz of timezones" [value]="tz.value">{{ tz.label }}</option>
+                                </select>
+                                <div *ngIf="isFieldInvalid('timezone', step2Form)" class="error-message">
+                                    Please select your timezone
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Address *</label>
+                            <div class="address-group">
+                                <input formControlName="street" type="text" class="form-control"
+                                    placeholder="Street address">
+                                <div class="form-row">
+                                    <input formControlName="city" type="text" class="form-control" placeholder="City">
+                                    <input formControlName="state" type="text" class="form-control"
+                                        placeholder="State/Province">
+                                </div>
+                                <div class="form-row">
+                                    <select formControlName="country" class="form-control">
+                                        <option value="">Select country</option>
+                                        <option *ngFor="let country of countries" [value]="country.code">{{ country.name
+                                            }}</option>
+                                    </select>
+                                    <input formControlName="postalCode" type="text" class="form-control"
+                                        placeholder="Postal code">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="bio">Professional Bio</label>
+                            <textarea id="bio" formControlName="bio" class="form-control" rows="4"
+                                placeholder="Brief description of your professional background and experience"></textarea>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-secondary" (click)="previousStep()">Previous</button>
+                            <button type="submit" class="btn btn-primary" [disabled]="!step2Form.valid || isLoading">
+                                <span *ngIf="isLoading" class="spinner"></span>
+                                Continue to Security Setup
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Step 3: Security Setup -->
+                <div *ngIf="currentStep === 3" class="step-content">
+                    <div class="step-header">
+                        <h2>Security & Authentication</h2>
+                        <p>Set up security questions and authentication preferences</p>
+                    </div>
+
+                    <form [formGroup]="step3Form" (ngSubmit)="completeStep(3)" class="onboarding-form">
+                        <div class="form-group">
+                            <label for="currentPassword">Confirm Current Password *</label>
+                            <div class="password-input">
+                                <input id="currentPassword" formControlName="currentPassword"
+                                    [type]="showPassword ? 'text' : 'password'" class="form-control"
+                                    placeholder="Enter your current password">
+                                <button type="button" class="password-toggle" (click)="togglePassword()">
+                                    <i [class]="showPassword ? 'fas fa-eye-slash' : 'fas fa-eye'"></i>
+                                </button>
+                            </div>
+                            <div *ngIf="isFieldInvalid('currentPassword', step3Form)" class="error-message">
+                                Please confirm your current password
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Security Questions *</label>
+                            <div class="security-questions">
+                                <div *ngFor="let question of securityQuestions; let i = index" class="question-group">
+                                    <select [(ngModel)]="question.question" [ngModelOptions]="{standalone: true}"
+                                        class="form-control">
+                                        <option value="">Select a security question</option>
+                                        <option *ngFor="let q of predefinedQuestions" [value]="q">{{ q }}</option>
+                                    </select>
+                                    <input [(ngModel)]="question.answer" [ngModelOptions]="{standalone: true}"
+                                        type="text" class="form-control" placeholder="Your answer">
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="backupEmail">Backup Email</label>
+                            <input id="backupEmail" formControlName="backupEmail" type="email" class="form-control"
+                                placeholder="backup@example.com">
+                        </div>
+
+                        <div class="form-group">
+                            <div class="checkbox-group">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" formControlName="mfaEnabled">
+                                    <span class="checkmark"></span>
+                                    Enable Two-Factor Authentication (recommended)
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-secondary" (click)="previousStep()">Previous</button>
+                            <button type="submit" class="btn btn-primary" [disabled]="!step3Form.valid || isLoading">
+                                <span *ngIf="isLoading" class="spinner"></span>
+                                Continue to Preferences
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Step 4: Preferences Setup -->
+                <div *ngIf="currentStep === 4" class="step-content">
+                    <div class="step-header">
+                        <h2>Preferences</h2>
+                        <p>Customize your experience and notification settings</p>
+                    </div>
+
+                    <form [formGroup]="step4Form" (ngSubmit)="completeStep(4)" class="onboarding-form">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="theme">Theme</label>
+                                <div class="theme-selector">
+                                    <label *ngFor="let theme of themes" class="theme-option">
+                                        <input type="radio" formControlName="theme" [value]="theme.value">
+                                        <div class="theme-preview" [class]="theme.value">
+                                            <div class="theme-icon">{{ theme.icon }}</div>
+                                            <span>{{ theme.label }}</span>
+                                        </div>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <div class="form-group">
+                                <label for="language">Language</label>
+                                <select id="language" formControlName="language" class="form-control">
+                                    <option *ngFor="let lang of languages" [value]="lang.code">{{ lang.name }}</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Notification Preferences</label>
+                            <div class="notification-preferences">
+                                <div *ngFor="let notif of notificationTypes" class="notification-row">
+                                    <div class="notification-label">{{ notif.label }}</div>
+                                    <div class="notification-channels">
+                                        <label class="checkbox-label">
+                                            <input type="checkbox" [formControlName]="notif.key + '_email'">
+                                            <span class="checkmark"></span>
+                                            Email
+                                        </label>
+                                        <label class="checkbox-label">
+                                            <input type="checkbox" [formControlName]="notif.key + '_inApp'">
+                                            <span class="checkmark"></span>
+                                            In-App
+                                        </label>
+                                        <label class="checkbox-label">
+                                            <input type="checkbox" [formControlName]="notif.key + '_sms'">
+                                            <span class="checkmark"></span>
+                                            SMS
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="dashboardLayout">Dashboard Layout</label>
+                            <div class="layout-selector">
+                                <label *ngFor="let layout of dashboardLayouts" class="layout-option">
+                                    <input type="radio" formControlName="dashboardLayout" [value]="layout.value">
+                                    <div class="layout-preview">
+                                        <div class="layout-icon">{{ layout.icon }}</div>
+                                        <span>{{ layout.label }}</span>
+                                    </div>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-secondary" (click)="previousStep()">Previous</button>
+                            <button type="submit" class="btn btn-primary" [disabled]="!step4Form.valid || isLoading">
+                                <span *ngIf="isLoading" class="spinner"></span>
+                                Continue to Training
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Step 5: Training & Compliance -->
+                <div *ngIf="currentStep === 5" class="step-content">
+                    <div class="step-header">
+                        <h2>Training & Compliance</h2>
+                        <p>Complete required training modules and compliance acknowledgments</p>
+                    </div>
+
+                    <form [formGroup]="step5Form" (ngSubmit)="completeStep(5)" class="onboarding-form">
+                        <div class="form-group">
+                            <label>Required Training Modules</label>
+                            <div class="training-modules">
+                                <div *ngFor="let module of trainingModules" class="training-module">
+                                    <div class="module-header">
+                                        <h4>{{ module.title }}</h4>
+                                        <span class="module-duration">{{ module.duration }}</span>
+                                    </div>
+                                    <p>{{ module.description }}</p>
+                                    <div class="module-actions">
+                                        <button type="button" class="btn btn-outline-primary"
+                                            [disabled]="module.completed" (click)="startTrainingModule(module)">
+                                            {{ module.completed ? 'Completed' : 'Start Module' }}
+                                        </button>
+                                        <i *ngIf="module.completed" class="fas fa-check-circle text-success"></i>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <div class="compliance-section">
+                                <h4>Compliance Acknowledgments</h4>
+                                <div class="checkbox-group">
+                                    <label class="checkbox-label">
+                                        <input type="checkbox" formControlName="complianceAcknowledgment" required>
+                                        <span class="checkmark"></span>
+                                        I acknowledge that I have read and understood the platform's compliance
+                                        requirements and agree to follow all applicable regulations and policies.
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="button" class="btn btn-secondary" (click)="previousStep()">Previous</button>
+                            <button type="submit" class="btn btn-success"
+                                [disabled]="!step5Form.valid || !allTrainingCompleted || isLoading">
+                                <span *ngIf="isLoading" class="spinner"></span>
+                                Complete Onboarding
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- Success Message -->
+                <div *ngIf="isCompleted" class="step-content success-content">
+                    <div class="success-animation">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <h2>Welcome to BlockTrade!</h2>
+                    <p>Your account is now fully set up and ready to use. You'll be redirected to your dashboard in a
+                        few seconds.</p>
+                    <div class="next-steps">
+                        <h4>What's Next?</h4>
+                        <ul>
+                            <li>Explore your personalized dashboard</li>
+                            <li>Start your first Letter of Credit application</li>
+                            <li>Connect with your team members</li>
+                            <li>Set up your blockchain wallet</li>
+                        </ul>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-primary" (click)="goToDashboard()">
+                            Go to Dashboard
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

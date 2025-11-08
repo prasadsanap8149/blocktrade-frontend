@@ -1,0 +1,527 @@
+/* Letter of Credit Create Component Styles */
+
+.lc-create-container {
+    padding: 24px;
+    background-color: #f8fafc;
+    min-height: 100vh;
+    position: relative;
+}
+
+/* Header */
+.lc-create-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 32px;
+    background: white;
+    padding: 24px;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.header-content {
+    display: flex;
+    align-items: center;
+    gap: 16px;
+}
+
+.back-button {
+    background-color: #f1f5f9;
+    color: #475569;
+}
+
+.back-button:hover {
+    background-color: #e2e8f0;
+}
+
+.header-text {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.page-title {
+    margin: 0;
+    font-size: 28px;
+    font-weight: 700;
+    color: #1e293b;
+    letter-spacing: -0.025em;
+}
+
+.page-subtitle {
+    margin: 0;
+    font-size: 14px;
+    color: #64748b;
+    font-weight: 500;
+}
+
+.header-actions {
+    display: flex;
+    gap: 12px;
+}
+
+/* Loading Overlay */
+.loading-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(255, 255, 255, 0.9);
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 16px;
+    z-index: 1000;
+    backdrop-filter: blur(4px);
+}
+
+.loading-overlay p {
+    margin: 0;
+    font-size: 16px;
+    color: #64748b;
+    font-weight: 500;
+}
+
+/* Form Container */
+.form-container {
+    background: white;
+    border-radius: 12px;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+    transition: opacity 0.3s ease;
+}
+
+.form-container.loading {
+    opacity: 0.6;
+    pointer-events: none;
+}
+
+/* Stepper Customization */
+.mat-stepper-horizontal {
+    background: transparent;
+}
+
+.mat-stepper-horizontal .mat-horizontal-stepper-header-container {
+    padding: 24px 24px 0;
+    background: white;
+    border-radius: 12px 12px 0 0;
+}
+
+.mat-stepper-horizontal .mat-horizontal-content-container {
+    padding: 0;
+    background: white;
+    border-radius: 0 0 12px 12px;
+}
+
+/* Step Cards */
+.step-card {
+    border: none;
+    box-shadow: none;
+    background: transparent;
+    margin: 24px;
+    margin-top: 0;
+}
+
+.step-card .mat-mdc-card-header {
+    padding-bottom: 16px;
+    border-bottom: 1px solid #e2e8f0;
+    margin-bottom: 24px;
+}
+
+.step-card .mat-mdc-card-title {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 20px;
+    font-weight: 600;
+    color: #1e293b;
+}
+
+.step-card .mat-mdc-card-subtitle {
+    color: #64748b;
+    font-size: 14px;
+    margin-top: 4px;
+}
+
+.step-icon {
+    font-size: 24px;
+    width: 24px;
+    height: 24px;
+    color: #3b82f6;
+}
+
+/* Forms */
+.step-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.form-row {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+}
+
+.form-row.two-column {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+}
+
+.form-row.three-column {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 16px;
+}
+
+.form-row.checkbox-row {
+    display: flex;
+    gap: 24px;
+    align-items: center;
+    margin: 16px 0;
+}
+
+.full-width {
+    width: 100%;
+}
+
+/* Form Sections */
+.form-section {
+    margin-top: 32px;
+    padding-top: 24px;
+    border-top: 1px solid #e2e8f0;
+}
+
+.section-title {
+    margin: 0 0 16px;
+    font-size: 16px;
+    font-weight: 600;
+    color: #1e293b;
+}
+
+/* Document Requirements */
+.documents-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    margin-bottom: 24px;
+}
+
+.document-requirement {
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 16px;
+    background-color: #f8fafc;
+}
+
+.requirement-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+}
+
+.requirement-checkbox {
+    flex: 1;
+}
+
+.requirement-info {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.requirement-name {
+    font-weight: 600;
+    color: #1e293b;
+    font-size: 14px;
+}
+
+.requirement-description {
+    color: #64748b;
+    font-size: 12px;
+}
+
+.format-select {
+    min-width: 120px;
+}
+
+/* Review Summary */
+.review-summary {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+    padding: 24px;
+    background-color: #f8fafc;
+    border-radius: 8px;
+    margin-bottom: 24px;
+}
+
+.summary-section h4 {
+    margin: 0 0 8px;
+    font-size: 14px;
+    font-weight: 600;
+    color: #1e293b;
+    text-transform: uppercase;
+    letter-spacing: 0.025em;
+}
+
+.summary-section p {
+    margin: 0 0 4px;
+    font-size: 14px;
+    color: #64748b;
+    line-height: 1.4;
+}
+
+.summary-section .amount {
+    font-size: 18px;
+    font-weight: 700;
+    color: #059669;
+}
+
+/* Review Form */
+.review-form {
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.confirmation-checkboxes {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    padding: 20px;
+    background-color: #fef3c7;
+    border-radius: 8px;
+    border-left: 4px solid #f59e0b;
+}
+
+.confirmation-checkbox {
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.confirmation-checkbox .mat-mdc-checkbox-label {
+    color: #92400e;
+}
+
+/* Navigation */
+.step-navigation {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 24px;
+    background: white;
+    border-top: 1px solid #e2e8f0;
+    border-radius: 0 0 12px 12px;
+}
+
+.nav-spacer {
+    flex: 1;
+}
+
+.step-navigation button {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-transform: none;
+    font-weight: 500;
+}
+
+/* Material Form Field Customization */
+.mat-mdc-form-field {
+    width: 100%;
+}
+
+.mat-mdc-form-field .mat-mdc-text-field-wrapper {
+    background-color: white;
+    border-radius: 6px;
+}
+
+.mat-mdc-form-field .mat-mdc-text-field-wrapper:hover .mdc-line-ripple::before {
+    border-bottom-color: #3b82f6;
+}
+
+.mat-mdc-form-field.mat-focused .mat-mdc-text-field-wrapper .mdc-line-ripple::after {
+    border-bottom-color: #3b82f6;
+}
+
+/* Textarea Styling */
+textarea.mat-mdc-input-element {
+    resize: vertical;
+    min-height: 60px;
+}
+
+/* Error Messages */
+.mat-mdc-form-field-error {
+    font-size: 12px;
+    margin-top: 4px;
+}
+
+/* Date Picker */
+.mat-mdc-form-field .mat-datepicker-toggle {
+    color: #64748b;
+}
+
+.mat-mdc-form-field .mat-datepicker-toggle:hover {
+    color: #3b82f6;
+}
+
+/* Checkbox Styling */
+.mat-mdc-checkbox {
+    margin-right: 8px;
+}
+
+.mat-mdc-checkbox .mdc-checkbox__checkmark-path {
+    stroke: white !important;
+}
+
+/* Select Dropdown */
+.mat-mdc-select-value {
+    color: #1e293b;
+}
+
+.mat-mdc-select-placeholder {
+    color: #94a3b8;
+}
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .review-summary {
+        grid-template-columns: 1fr;
+    }
+}
+
+@media (max-width: 768px) {
+    .lc-create-container {
+        padding: 16px;
+    }
+
+    .lc-create-header {
+        flex-direction: column;
+        gap: 16px;
+        align-items: flex-start;
+    }
+
+    .header-content {
+        width: 100%;
+    }
+
+    .header-actions {
+        width: 100%;
+        justify-content: flex-end;
+    }
+
+    .page-title {
+        font-size: 24px;
+    }
+
+    .form-row.two-column,
+    .form-row.three-column {
+        grid-template-columns: 1fr;
+    }
+
+    .form-row.checkbox-row {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .requirement-row {
+        flex-direction: column;
+        gap: 12px;
+    }
+
+    .format-select {
+        min-width: unset;
+        width: 100%;
+    }
+
+    .step-navigation {
+        flex-direction: column-reverse;
+        gap: 16px;
+    }
+
+    .step-navigation button {
+        width: 100%;
+        justify-content: center;
+    }
+}
+
+@media (max-width: 480px) {
+    .step-card {
+        margin: 16px;
+    }
+
+    .step-navigation {
+        padding: 16px;
+    }
+
+    .confirmation-checkboxes {
+        padding: 16px;
+    }
+}
+
+/* Focus States */
+.mat-mdc-button:focus,
+.mat-mdc-raised-button:focus {
+    outline: 2px solid #3b82f6;
+    outline-offset: 2px;
+}
+
+/* Animation */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.step-card {
+    animation: fadeIn 0.3s ease-out;
+}
+
+/* Loading States */
+.mat-mdc-button:disabled,
+.mat-mdc-raised-button:disabled {
+    opacity: 0.6;
+}
+
+/* Stepper Step Icons */
+.mat-step-header .mat-step-icon {
+    background-color: #e2e8f0;
+    color: #64748b;
+}
+
+.mat-step-header .mat-step-icon-selected {
+    background-color: #3b82f6;
+    color: white;
+}
+
+.mat-step-header .mat-step-icon-state-done {
+    background-color: #10b981;
+    color: white;
+}
+
+/* Tooltip Support */
+[title] {
+    cursor: help;
+}
+
+/* High Contrast Support */
+@media (prefers-contrast: high) {
+    .step-card {
+        border: 1px solid #64748b;
+    }
+
+    .requirement-checkbox {
+        border: 1px solid #64748b;
+    }
+}

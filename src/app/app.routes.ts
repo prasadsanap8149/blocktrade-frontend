@@ -15,6 +15,12 @@ export const routes: Routes = [
     data: { preload: false } // Don't preload auth routes
   },
   {
+    path: 'onboarding',
+    loadChildren: () => import('./features/onboarding/onboarding.routes').then(m => m.ONBOARDING_ROUTES),
+    canActivate: [authGuard],
+    data: { preload: true } // Preload onboarding for new users
+  },
+  {
     path: 'dashboard',
     loadChildren: () => import('./features/dashboard/dashboard.routes').then(m => m.DOCUMENTS_ROUTES),
     canActivate: [authGuard],

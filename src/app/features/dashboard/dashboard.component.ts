@@ -18,6 +18,7 @@ import { ApiService } from '../../core/services/api.service';
 import { User, UserRole, UserJourney, JourneyStep as JourneyStepInterface } from '../../core/models/user.model';
 import { MESSAGES } from '../../shared/constants/messages.constants';
 import { APP_CONFIG } from '../../shared/constants/app-config.constants';
+import { DashboardService } from './dashboard.service';
 
 interface DashboardStats {
   totalLettersOfCredit: number;
@@ -30,13 +31,15 @@ interface DashboardStats {
 
 interface RecentActivity {
   id: string;
-  type: 'LC_CREATED' | 'LC_APPROVED' | 'DOCUMENT_UPLOADED' | 'PAYMENT_PROCESSED';
+  type: 'LC_CREATED' | 'LC_APPROVED' | 'LC_REJECTED' | 'DOCUMENT_UPLOADED' | 'PAYMENT_PROCESSED' | 'COMPLIANCE_CHECK';
   title: string;
   description: string;
   timestamp: Date;
-  status: 'SUCCESS' | 'PENDING' | 'FAILED';
+  status: 'SUCCESS' | 'PENDING' | 'FAILED' | 'WARNING';
   amount?: number;
   currency?: string;
+  priority: 'LOW' | 'MEDIUM' | 'HIGH';
+  metadata?: { [key: string]: any };
 }
 
 interface QuickAction {
@@ -76,6 +79,7 @@ interface QuickAction {
 export class DashboardComponent implements OnInit {
   private readonly authService = inject(AuthService);
   private readonly apiService = inject(ApiService);
+  private readonly dashboardService = inject(DashboardService);
   private readonly router = inject(Router);
 
   // Signals for reactive state management
@@ -235,26 +239,42 @@ export class DashboardComponent implements OnInit {
 
   private async initializeDashboard(): Promise<void> {
     try {
-      this.isLoading.set(true);
+      // Setup reactive subscriptions
+      this.setupDashboardSubscriptions();
       
-      // Get current user
-      this.authService.getCurrentUser().subscribe(user => {
+      // Subscribe to current user from AuthService observable
+      this.authService.currentUser$.subscribe(user => {
         if (user) {
+          console.log('Dashboard: User loaded from auth service', user);
           this.currentUser.set(user);
           this.loadUserJourney(user.id);
+        } else {
+          console.log('Dashboard: No user data available');
+          // If no user data but we're on dashboard, fetch it
+          if (this.authService.isAuthenticated()) {
+            console.log('Dashboard: Fetching current user from API');
+            this.authService.getCurrentUser().subscribe({
+              next: (fetchedUser) => {
+                console.log('Dashboard: User fetched successfully', fetchedUser);
+                this.currentUser.set(fetchedUser);
+                this.loadUserJourney(fetchedUser.id);
+              },
+              error: (error) => {
+                console.error('Dashboard: Failed to fetch user', error);
+              }
+            });
+          }
         }
       });
 
-      // Load dashboard data in parallel
-      await Promise.all([
-        this.loadDashboardStats(),
-        this.loadRecentActivities()
-      ]);
+      // Load fresh dashboard data
+      this.dashboardService.loadAllDashboardData().subscribe({
+        next: () => console.log('Dashboard data loaded successfully'),
+        error: (error) => console.error('Failed to load dashboard data:', error)
+      });
 
     } catch (error) {
       console.error('Error initializing dashboard:', error);
-    } finally {
-      this.isLoading.set(false);
     }
   }
 
@@ -269,28 +289,19 @@ export class DashboardComponent implements OnInit {
     }
   }
 
-  private async loadDashboardStats(): Promise<void> {
-    try {
-      const response = await this.apiService.get<DashboardStats>('/dashboard/stats').toPromise();
-      if (response?.data) {
-        this.dashboardStats.set(response.data);
-      }
-    } catch (error) {
-      console.error('Error loading dashboard stats:', error);
-    }
-  }
+  private setupDashboardSubscriptions(): void {
+    // Subscribe to dashboard service observables
+    this.dashboardService.dashboardStats$.subscribe(stats => {
+      this.dashboardStats.set(stats);
+    });
 
-  private async loadRecentActivities(): Promise<void> {
-    try {
-      const response = await this.apiService.get<RecentActivity[]>('/dashboard/activities', {
-        limit: 10
-      }).toPromise();
-      if (response?.data) {
-        this.recentActivities.set(response.data);
-      }
-    } catch (error) {
-      console.error('Error loading recent activities:', error);
-    }
+    this.dashboardService.recentActivities$.subscribe(activities => {
+      this.recentActivities.set(activities);
+    });
+
+    this.dashboardService.isLoading$.subscribe(loading => {
+      this.isLoading.set(loading);
+    });
   }
 
   private formatRoleName(role: string): string {
@@ -338,8 +349,10 @@ export class DashboardComponent implements OnInit {
     switch (type) {
       case 'LC_CREATED': return 'add_business';
       case 'LC_APPROVED': return 'check_circle';
+      case 'LC_REJECTED': return 'cancel';
       case 'DOCUMENT_UPLOADED': return 'cloud_upload';
       case 'PAYMENT_PROCESSED': return 'payment';
+      case 'COMPLIANCE_CHECK': return 'verified_user';
       default: return 'notifications';
     }
   }
@@ -349,6 +362,7 @@ export class DashboardComponent implements OnInit {
       case 'SUCCESS': return 'success';
       case 'PENDING': return 'warning';
       case 'FAILED': return 'error';
+      case 'WARNING': return 'warning';
       default: return 'default';
     }
   }

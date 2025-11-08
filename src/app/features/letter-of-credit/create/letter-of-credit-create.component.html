@@ -1,0 +1,645 @@
+<div class="lc-create-container">
+    <!-- Header -->
+    <div class="lc-create-header">
+        <div class="header-content">
+            <button mat-icon-button class="back-button" (click)="onCancel()" type="button">
+                <mat-icon>arrow_back</mat-icon>
+            </button>
+            <div class="header-text">
+                <h1 class="page-title">Create Letter of Credit</h1>
+                <p class="page-subtitle">Complete all sections to create a new trade finance document</p>
+            </div>
+        </div>
+        <div class="header-actions">
+            <button mat-button color="accent" (click)="onSaveDraft()" type="button" [disabled]="isLoading()">
+                <mat-icon>save</mat-icon>
+                Save Draft
+            </button>
+        </div>
+    </div>
+
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" *ngIf="isLoading()">
+        <mat-spinner diameter="40"></mat-spinner>
+        <p>Creating Letter of Credit...</p>
+    </div>
+
+    <!-- Multi-step Form -->
+    <div class="form-container" [class.loading]="isLoading()">
+        <mat-stepper orientation="horizontal" [selectedIndex]="currentStep()"
+            (selectionChange)="onStepChange($event.selectedIndex)">
+
+            <!-- Step 1: Applicant Information -->
+            <mat-step [stepControl]="applicantForm" [completed]="applicantForm.valid">
+                <ng-template matStepLabel>{{ getStepTitle(0) }}</ng-template>
+
+                <mat-card class="step-card">
+                    <mat-card-header>
+                        <mat-card-title>
+                            <mat-icon class="step-icon">{{ getStepIcon(0) }}</mat-icon>
+                            Applicant Information
+                        </mat-card-title>
+                        <mat-card-subtitle>Enter the LC applicant (buyer) details</mat-card-subtitle>
+                    </mat-card-header>
+
+                    <mat-card-content>
+                        <form [formGroup]="applicantForm" class="step-form">
+                            <div class="form-row">
+                                <mat-form-field class="full-width">
+                                    <mat-label>Company Name</mat-label>
+                                    <input matInput formControlName="companyName" placeholder="Enter company name">
+                                    <mat-error *ngIf="applicantForm.get('companyName')?.hasError('required')">
+                                        Company name is required
+                                    </mat-error>
+                                    <mat-error *ngIf="applicantForm.get('companyName')?.hasError('minlength')">
+                                        Company name must be at least 2 characters
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+
+                            <div class="form-row">
+                                <mat-form-field class="full-width">
+                                    <mat-label>Address</mat-label>
+                                    <textarea matInput formControlName="address" rows="3"
+                                        placeholder="Enter complete address"></textarea>
+                                    <mat-error *ngIf="applicantForm.get('address')?.hasError('required')">
+                                        Address is required
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+
+                            <div class="form-row two-column">
+                                <mat-form-field>
+                                    <mat-label>City</mat-label>
+                                    <input matInput formControlName="city" placeholder="Enter city">
+                                    <mat-error *ngIf="applicantForm.get('city')?.hasError('required')">
+                                        City is required
+                                    </mat-error>
+                                </mat-form-field>
+
+                                <mat-form-field>
+                                    <mat-label>Country</mat-label>
+                                    <mat-select formControlName="country">
+                                        <mat-option *ngFor="let country of countries()" [value]="country">
+                                            {{ country }}
+                                        </mat-option>
+                                    </mat-select>
+                                    <mat-error *ngIf="applicantForm.get('country')?.hasError('required')">
+                                        Country is required
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+
+                            <div class="form-row two-column">
+                                <mat-form-field>
+                                    <mat-label>Contact Person</mat-label>
+                                    <input matInput formControlName="contactPerson" placeholder="Enter contact person">
+                                    <mat-error *ngIf="applicantForm.get('contactPerson')?.hasError('required')">
+                                        Contact person is required
+                                    </mat-error>
+                                </mat-form-field>
+
+                                <mat-form-field>
+                                    <mat-label>Email</mat-label>
+                                    <input matInput type="email" formControlName="email" placeholder="Enter email">
+                                    <mat-error *ngIf="applicantForm.get('email')?.hasError('required')">
+                                        Email is required
+                                    </mat-error>
+                                    <mat-error *ngIf="applicantForm.get('email')?.hasError('email')">
+                                        Please enter a valid email
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+
+                            <div class="form-row two-column">
+                                <mat-form-field>
+                                    <mat-label>Phone</mat-label>
+                                    <input matInput formControlName="phone" placeholder="Enter phone number">
+                                    <mat-error *ngIf="applicantForm.get('phone')?.hasError('required')">
+                                        Phone number is required
+                                    </mat-error>
+                                </mat-form-field>
+
+                                <mat-form-field>
+                                    <mat-label>Account Number</mat-label>
+                                    <input matInput formControlName="accountNumber" placeholder="Enter account number">
+                                    <mat-error *ngIf="applicantForm.get('accountNumber')?.hasError('required')">
+                                        Account number is required
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+                        </form>
+                    </mat-card-content>
+                </mat-card>
+            </mat-step>
+
+            <!-- Step 2: Beneficiary Information -->
+            <mat-step [stepControl]="beneficiaryForm" [completed]="beneficiaryForm.valid">
+                <ng-template matStepLabel>{{ getStepTitle(1) }}</ng-template>
+
+                <mat-card class="step-card">
+                    <mat-card-header>
+                        <mat-card-title>
+                            <mat-icon class="step-icon">{{ getStepIcon(1) }}</mat-icon>
+                            Beneficiary Information
+                        </mat-card-title>
+                        <mat-card-subtitle>Enter the LC beneficiary (seller) details</mat-card-subtitle>
+                    </mat-card-header>
+
+                    <mat-card-content>
+                        <form [formGroup]="beneficiaryForm" class="step-form">
+                            <div class="form-row">
+                                <mat-form-field class="full-width">
+                                    <mat-label>Company Name</mat-label>
+                                    <input matInput formControlName="companyName"
+                                        placeholder="Enter beneficiary company name">
+                                    <mat-error *ngIf="beneficiaryForm.get('companyName')?.hasError('required')">
+                                        Company name is required
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+
+                            <div class="form-row">
+                                <mat-form-field class="full-width">
+                                    <mat-label>Address</mat-label>
+                                    <textarea matInput formControlName="address" rows="3"
+                                        placeholder="Enter complete address"></textarea>
+                                    <mat-error *ngIf="beneficiaryForm.get('address')?.hasError('required')">
+                                        Address is required
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+
+                            <div class="form-row two-column">
+                                <mat-form-field>
+                                    <mat-label>City</mat-label>
+                                    <input matInput formControlName="city" placeholder="Enter city">
+                                    <mat-error *ngIf="beneficiaryForm.get('city')?.hasError('required')">
+                                        City is required
+                                    </mat-error>
+                                </mat-form-field>
+
+                                <mat-form-field>
+                                    <mat-label>Country</mat-label>
+                                    <mat-select formControlName="country">
+                                        <mat-option *ngFor="let country of countries()" [value]="country">
+                                            {{ country }}
+                                        </mat-option>
+                                    </mat-select>
+                                    <mat-error *ngIf="beneficiaryForm.get('country')?.hasError('required')">
+                                        Country is required
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+
+                            <div class="form-row two-column">
+                                <mat-form-field>
+                                    <mat-label>Contact Person</mat-label>
+                                    <input matInput formControlName="contactPerson" placeholder="Enter contact person">
+                                    <mat-error *ngIf="beneficiaryForm.get('contactPerson')?.hasError('required')">
+                                        Contact person is required
+                                    </mat-error>
+                                </mat-form-field>
+
+                                <mat-form-field>
+                                    <mat-label>Email</mat-label>
+                                    <input matInput type="email" formControlName="email" placeholder="Enter email">
+                                    <mat-error *ngIf="beneficiaryForm.get('email')?.hasError('required')">
+                                        Email is required
+                                    </mat-error>
+                                    <mat-error *ngIf="beneficiaryForm.get('email')?.hasError('email')">
+                                        Please enter a valid email
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+
+                            <div class="form-section">
+                                <h4 class="section-title">Banking Information</h4>
+
+                                <div class="form-row">
+                                    <mat-form-field class="full-width">
+                                        <mat-label>Bank Name</mat-label>
+                                        <input matInput formControlName="bankName" placeholder="Enter bank name">
+                                        <mat-error *ngIf="beneficiaryForm.get('bankName')?.hasError('required')">
+                                            Bank name is required
+                                        </mat-error>
+                                    </mat-form-field>
+                                </div>
+
+                                <div class="form-row">
+                                    <mat-form-field class="full-width">
+                                        <mat-label>Bank Address</mat-label>
+                                        <textarea matInput formControlName="bankAddress" rows="2"
+                                            placeholder="Enter bank address"></textarea>
+                                        <mat-error *ngIf="beneficiaryForm.get('bankAddress')?.hasError('required')">
+                                            Bank address is required
+                                        </mat-error>
+                                    </mat-form-field>
+                                </div>
+
+                                <div class="form-row">
+                                    <mat-form-field>
+                                        <mat-label>SWIFT Code</mat-label>
+                                        <input matInput formControlName="swiftCode" placeholder="e.g., ABCDUS33XXX">
+                                        <mat-error *ngIf="beneficiaryForm.get('swiftCode')?.hasError('required')">
+                                            SWIFT code is required
+                                        </mat-error>
+                                        <mat-error *ngIf="beneficiaryForm.get('swiftCode')?.hasError('pattern')">
+                                            Please enter a valid SWIFT code
+                                        </mat-error>
+                                    </mat-form-field>
+                                </div>
+                            </div>
+                        </form>
+                    </mat-card-content>
+                </mat-card>
+            </mat-step>
+
+            <!-- Step 3: Credit Details -->
+            <mat-step [stepControl]="creditDetailsForm" [completed]="creditDetailsForm.valid">
+                <ng-template matStepLabel>{{ getStepTitle(2) }}</ng-template>
+
+                <mat-card class="step-card">
+                    <mat-card-header>
+                        <mat-card-title>
+                            <mat-icon class="step-icon">{{ getStepIcon(2) }}</mat-icon>
+                            Credit Details
+                        </mat-card-title>
+                        <mat-card-subtitle>Specify the financial terms of the letter of credit</mat-card-subtitle>
+                    </mat-card-header>
+
+                    <mat-card-content>
+                        <form [formGroup]="creditDetailsForm" class="step-form">
+                            <div class="form-row two-column">
+                                <mat-form-field>
+                                    <mat-label>Amount</mat-label>
+                                    <input matInput type="number" formControlName="amount" placeholder="0.00">
+                                    <mat-error *ngIf="creditDetailsForm.get('amount')?.hasError('required')">
+                                        Amount is required
+                                    </mat-error>
+                                    <mat-error *ngIf="creditDetailsForm.get('amount')?.hasError('min')">
+                                        Amount must be greater than 0
+                                    </mat-error>
+                                </mat-form-field>
+
+                                <mat-form-field>
+                                    <mat-label>Currency</mat-label>
+                                    <mat-select formControlName="currency">
+                                        <mat-option *ngFor="let currency of currencies()" [value]="currency">
+                                            {{ currency }}
+                                        </mat-option>
+                                    </mat-select>
+                                    <mat-error *ngIf="creditDetailsForm.get('currency')?.hasError('required')">
+                                        Currency is required
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+
+                            <div class="form-row">
+                                <mat-form-field>
+                                    <mat-label>Tolerance (%)</mat-label>
+                                    <input matInput type="number" formControlName="tolerance" placeholder="10">
+                                    <mat-hint>Allowable variance in amount (0-20%)</mat-hint>
+                                    <mat-error *ngIf="creditDetailsForm.get('tolerance')?.hasError('min')">
+                                        Tolerance cannot be negative
+                                    </mat-error>
+                                    <mat-error *ngIf="creditDetailsForm.get('tolerance')?.hasError('max')">
+                                        Tolerance cannot exceed 20%
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+
+                            <div class="form-row">
+                                <mat-form-field class="full-width">
+                                    <mat-label>Description of Goods/Services</mat-label>
+                                    <textarea matInput formControlName="description" rows="4"
+                                        placeholder="Enter detailed description of goods or services"></textarea>
+                                    <mat-error *ngIf="creditDetailsForm.get('description')?.hasError('required')">
+                                        Description is required
+                                    </mat-error>
+                                    <mat-error *ngIf="creditDetailsForm.get('description')?.hasError('minlength')">
+                                        Description must be at least 10 characters
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+
+                            <div class="form-row two-column">
+                                <mat-form-field>
+                                    <mat-label>Payment Terms</mat-label>
+                                    <mat-select formControlName="paymentTerms">
+                                        <mat-option value="sight">At Sight</mat-option>
+                                        <mat-option value="usance">Usance</mat-option>
+                                        <mat-option value="deferred">Deferred Payment</mat-option>
+                                    </mat-select>
+                                    <mat-error *ngIf="creditDetailsForm.get('paymentTerms')?.hasError('required')">
+                                        Payment terms are required
+                                    </mat-error>
+                                </mat-form-field>
+
+                                <mat-form-field>
+                                    <mat-label>Tenor (Days)</mat-label>
+                                    <input matInput type="number" formControlName="tenor" placeholder="0">
+                                    <mat-hint>Payment tenor in days (0 for at sight)</mat-hint>
+                                    <mat-error *ngIf="creditDetailsForm.get('tenor')?.hasError('min')">
+                                        Tenor cannot be negative
+                                    </mat-error>
+                                    <mat-error *ngIf="creditDetailsForm.get('tenor')?.hasError('max')">
+                                        Tenor cannot exceed 365 days
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+
+                            <div class="form-row two-column">
+                                <mat-form-field>
+                                    <mat-label>Available With</mat-label>
+                                    <mat-select formControlName="availableWith">
+                                        <mat-option value="issuing_bank">Issuing Bank</mat-option>
+                                        <mat-option value="advising_bank">Advising Bank</mat-option>
+                                        <mat-option value="confirming_bank">Confirming Bank</mat-option>
+                                        <mat-option value="any_bank">Any Bank</mat-option>
+                                    </mat-select>
+                                    <mat-error *ngIf="creditDetailsForm.get('availableWith')?.hasError('required')">
+                                        Please select availability
+                                    </mat-error>
+                                </mat-form-field>
+
+                                <mat-form-field>
+                                    <mat-label>Available By</mat-label>
+                                    <mat-select formControlName="availableBy">
+                                        <mat-option value="payment">Payment</mat-option>
+                                        <mat-option value="acceptance">Acceptance</mat-option>
+                                        <mat-option value="negotiation">Negotiation</mat-option>
+                                        <mat-option value="deferred_payment">Deferred Payment</mat-option>
+                                    </mat-select>
+                                    <mat-error *ngIf="creditDetailsForm.get('availableBy')?.hasError('required')">
+                                        Please select payment method
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+                        </form>
+                    </mat-card-content>
+                </mat-card>
+            </mat-step>
+
+            <!-- Step 4: Trade Terms -->
+            <mat-step [stepControl]="tradeTermsForm" [completed]="tradeTermsForm.valid">
+                <ng-template matStepLabel>{{ getStepTitle(3) }}</ng-template>
+
+                <mat-card class="step-card">
+                    <mat-card-header>
+                        <mat-card-title>
+                            <mat-icon class="step-icon">{{ getStepIcon(3) }}</mat-icon>
+                            Trade Terms
+                        </mat-card-title>
+                        <mat-card-subtitle>Define shipment and delivery terms</mat-card-subtitle>
+                    </mat-card-header>
+
+                    <mat-card-content>
+                        <form [formGroup]="tradeTermsForm" class="step-form">
+                            <div class="form-row">
+                                <mat-form-field>
+                                    <mat-label>Incoterms</mat-label>
+                                    <mat-select formControlName="incoterms">
+                                        <mat-option *ngFor="let term of incoterms()" [value]="term">
+                                            {{ term }}
+                                        </mat-option>
+                                    </mat-select>
+                                    <mat-error *ngIf="tradeTermsForm.get('incoterms')?.hasError('required')">
+                                        Incoterms selection is required
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+
+                            <div class="form-row two-column">
+                                <mat-form-field>
+                                    <mat-label>Port of Loading</mat-label>
+                                    <input matInput formControlName="portOfLoading" placeholder="Enter port of loading">
+                                    <mat-error *ngIf="tradeTermsForm.get('portOfLoading')?.hasError('required')">
+                                        Port of loading is required
+                                    </mat-error>
+                                </mat-form-field>
+
+                                <mat-form-field>
+                                    <mat-label>Port of Discharge</mat-label>
+                                    <input matInput formControlName="portOfDischarge"
+                                        placeholder="Enter port of discharge">
+                                    <mat-error *ngIf="tradeTermsForm.get('portOfDischarge')?.hasError('required')">
+                                        Port of discharge is required
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+
+                            <div class="form-row checkbox-row">
+                                <mat-checkbox formControlName="partialShipment">
+                                    Allow Partial Shipment
+                                </mat-checkbox>
+
+                                <mat-checkbox formControlName="transhipment">
+                                    Allow Transhipment
+                                </mat-checkbox>
+                            </div>
+
+                            <div class="form-row three-column">
+                                <mat-form-field>
+                                    <mat-label>Shipment Deadline</mat-label>
+                                    <input matInput [matDatepicker]="shipmentPicker" formControlName="shipmentDeadline">
+                                    <mat-datepicker-toggle matSuffix [for]="shipmentPicker"></mat-datepicker-toggle>
+                                    <mat-datepicker #shipmentPicker></mat-datepicker>
+                                    <mat-error *ngIf="tradeTermsForm.get('shipmentDeadline')?.hasError('required')">
+                                        Shipment deadline is required
+                                    </mat-error>
+                                </mat-form-field>
+
+                                <mat-form-field>
+                                    <mat-label>Latest Shipment Date</mat-label>
+                                    <input matInput [matDatepicker]="latestShipmentPicker"
+                                        formControlName="latestShipmentDate">
+                                    <mat-datepicker-toggle matSuffix
+                                        [for]="latestShipmentPicker"></mat-datepicker-toggle>
+                                    <mat-datepicker #latestShipmentPicker></mat-datepicker>
+                                    <mat-error *ngIf="tradeTermsForm.get('latestShipmentDate')?.hasError('required')">
+                                        Latest shipment date is required
+                                    </mat-error>
+                                </mat-form-field>
+
+                                <mat-form-field>
+                                    <mat-label>LC Expiry Date</mat-label>
+                                    <input matInput [matDatepicker]="expiryPicker" formControlName="expiryDate">
+                                    <mat-datepicker-toggle matSuffix [for]="expiryPicker"></mat-datepicker-toggle>
+                                    <mat-datepicker #expiryPicker></mat-datepicker>
+                                    <mat-error *ngIf="tradeTermsForm.get('expiryDate')?.hasError('required')">
+                                        LC expiry date is required
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+                        </form>
+                    </mat-card-content>
+                </mat-card>
+            </mat-step>
+
+            <!-- Step 5: Document Requirements -->
+            <mat-step [stepControl]="documentsForm" [completed]="documentsForm.valid">
+                <ng-template matStepLabel>{{ getStepTitle(4) }}</ng-template>
+
+                <mat-card class="step-card">
+                    <mat-card-header>
+                        <mat-card-title>
+                            <mat-icon class="step-icon">{{ getStepIcon(4) }}</mat-icon>
+                            Document Requirements
+                        </mat-card-title>
+                        <mat-card-subtitle>Specify required documents for payment</mat-card-subtitle>
+                    </mat-card-header>
+
+                    <mat-card-content>
+                        <form [formGroup]="documentsForm" class="step-form">
+                            <div class="documents-list">
+                                <div *ngFor="let requirement of documentRequirements(); let i = index"
+                                    formArrayName="requirements" class="document-requirement">
+                                    <div [formGroupName]="i" class="requirement-row">
+                                        <mat-checkbox [formControlName]="'required'" class="requirement-checkbox">
+                                            <div class="requirement-info">
+                                                <span class="requirement-name">{{ requirement.name }}</span>
+                                                <span class="requirement-description">{{ requirement.description
+                                                    }}</span>
+                                            </div>
+                                        </mat-checkbox>
+
+                                        <mat-form-field class="format-select"
+                                            *ngIf="requirementsArray.at(i).get('required')?.value">
+                                            <mat-label>Format</mat-label>
+                                            <mat-select [formControlName]="'format'">
+                                                <mat-option *ngFor="let format of getRequirementFormats(requirement.id)"
+                                                    [value]="format">
+                                                    {{ format }}
+                                                </mat-option>
+                                            </mat-select>
+                                        </mat-form-field>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-row">
+                                <mat-form-field class="full-width">
+                                    <mat-label>Special Instructions</mat-label>
+                                    <textarea matInput formControlName="specialInstructions" rows="4"
+                                        placeholder="Enter any special instructions for document presentation"></textarea>
+                                </mat-form-field>
+                            </div>
+
+                            <div class="form-row">
+                                <mat-form-field>
+                                    <mat-label>Presentation Period (Days)</mat-label>
+                                    <input matInput type="number" formControlName="presentationPeriod" placeholder="21">
+                                    <mat-hint>Number of days to present documents after shipment</mat-hint>
+                                    <mat-error *ngIf="documentsForm.get('presentationPeriod')?.hasError('required')">
+                                        Presentation period is required
+                                    </mat-error>
+                                    <mat-error *ngIf="documentsForm.get('presentationPeriod')?.hasError('min')">
+                                        Must be at least 1 day
+                                    </mat-error>
+                                    <mat-error *ngIf="documentsForm.get('presentationPeriod')?.hasError('max')">
+                                        Cannot exceed 30 days
+                                    </mat-error>
+                                </mat-form-field>
+                            </div>
+                        </form>
+                    </mat-card-content>
+                </mat-card>
+            </mat-step>
+
+            <!-- Step 6: Review & Submit -->
+            <mat-step [stepControl]="reviewForm" [completed]="reviewForm.valid">
+                <ng-template matStepLabel>{{ getStepTitle(5) }}</ng-template>
+
+                <mat-card class="step-card">
+                    <mat-card-header>
+                        <mat-card-title>
+                            <mat-icon class="step-icon">{{ getStepIcon(5) }}</mat-icon>
+                            Review & Submit
+                        </mat-card-title>
+                        <mat-card-subtitle>Review all information before submitting</mat-card-subtitle>
+                    </mat-card-header>
+
+                    <mat-card-content>
+                        <!-- Review Summary -->
+                        <div class="review-summary">
+                            <div class="summary-section">
+                                <h4>Applicant</h4>
+                                <p>{{ applicantForm.get('companyName')?.value }}</p>
+                                <p>{{ applicantForm.get('address')?.value }}</p>
+                            </div>
+
+                            <div class="summary-section">
+                                <h4>Beneficiary</h4>
+                                <p>{{ beneficiaryForm.get('companyName')?.value }}</p>
+                                <p>{{ beneficiaryForm.get('address')?.value }}</p>
+                            </div>
+
+                            <div class="summary-section">
+                                <h4>Credit Amount</h4>
+                                <p class="amount">{{ creditDetailsForm.get('amount')?.value |
+                                    currency:creditDetailsForm.get('currency')?.value }}</p>
+                                <p>{{ creditDetailsForm.get('description')?.value }}</p>
+                            </div>
+
+                            <div class="summary-section">
+                                <h4>Key Dates</h4>
+                                <p>Shipment: {{ tradeTermsForm.get('shipmentDeadline')?.value | date }}</p>
+                                <p>Expiry: {{ tradeTermsForm.get('expiryDate')?.value | date }}</p>
+                            </div>
+                        </div>
+
+                        <!-- Confirmation Form -->
+                        <form [formGroup]="reviewForm" class="review-form">
+                            <div class="form-row">
+                                <mat-form-field class="full-width">
+                                    <mat-label>Additional Notes</mat-label>
+                                    <textarea matInput formControlName="additionalNotes" rows="3"
+                                        placeholder="Any additional notes or instructions"></textarea>
+                                </mat-form-field>
+                            </div>
+
+                            <div class="confirmation-checkboxes">
+                                <mat-checkbox formControlName="confirmAccuracy" class="confirmation-checkbox">
+                                    I confirm that all information provided is accurate and complete
+                                    <mat-error *ngIf="reviewForm.get('confirmAccuracy')?.hasError('required')">
+                                        Please confirm accuracy of information
+                                    </mat-error>
+                                </mat-checkbox>
+
+                                <mat-checkbox formControlName="agreeToTerms" class="confirmation-checkbox">
+                                    I agree to the BlockTrade terms and conditions
+                                    <mat-error *ngIf="reviewForm.get('agreeToTerms')?.hasError('required')">
+                                        Please agree to terms and conditions
+                                    </mat-error>
+                                </mat-checkbox>
+                            </div>
+                        </form>
+                    </mat-card-content>
+                </mat-card>
+            </mat-step>
+        </mat-stepper>
+
+        <!-- Navigation Buttons -->
+        <div class="step-navigation">
+            <button mat-button (click)="previousStep()" [disabled]="isFirstStep() || isLoading()" type="button">
+                <mat-icon>chevron_left</mat-icon>
+                Previous
+            </button>
+
+            <div class="nav-spacer"></div>
+
+            <button mat-raised-button color="primary" (click)="nextStep()" *ngIf="!isLastStep()"
+                [disabled]="!canProceed() || isLoading()" type="button">
+                Next
+                <mat-icon>chevron_right</mat-icon>
+            </button>
+
+            <button mat-raised-button color="primary" (click)="onSubmit()" *ngIf="isLastStep()"
+                [disabled]="!canProceed() || isLoading()" type="button">
+                <mat-icon>send</mat-icon>
+                Submit Letter of Credit
+            </button>
+        </div>
+    </div>
+</div>

@@ -10,6 +10,7 @@ import { map, tap, catchError, switchMap } from 'rxjs/operators';
 
 import { ApiService } from './api.service';
 import { NotificationService } from './notification.service';
+import { SecureStorageService } from '../../shared/services/secure-storage.service';
 import { API_ENDPOINTS } from '../../shared/constants/api-endpoint.constants';
 import { APP_CONFIG } from '../../shared/constants/app-config.constants';
 import { MESSAGES } from '../../shared/constants/messages.constants';
@@ -33,6 +34,7 @@ export class AuthService {
   private readonly router = inject(Router);
   private readonly apiService = inject(ApiService);
   private readonly notificationService = inject(NotificationService);
+  private readonly secureStorage = inject(SecureStorageService);
 
   private currentUserSubject = new BehaviorSubject<User | null>(null);
   private isAuthenticatedSubject = new BehaviorSubject<boolean>(false);
@@ -66,15 +68,32 @@ export class AuthService {
    * User Login
    */
   login(credentials: UserLogin): Observable<AuthResponse> {
-    return this.apiService.post<AuthResponse>(API_ENDPOINTS.AUTH.LOGIN, credentials).pipe(
-      map(response => response.data),
-      tap(authResponse => {
-        if (authResponse.success && authResponse.data) {
-          this.handleSuccessfulAuth(authResponse.data);
-          this.notificationService.success(this.getMessage('SUCCESS.LOGIN'));
+    return this.apiService.post<any>(API_ENDPOINTS.AUTH.LOGIN, credentials).pipe(
+      tap(response => {
+        console.log('Login response received:', response);
+        
+        // Response structure: { success: true, message: string, data: { user, tokens, organizationInfo } }
+        if (response?.success && response?.data) {
+          const { user, tokens, organizationInfo } = response.data;
+          
+          if (user && tokens) {
+            console.log('Processing successful authentication...');
+            this.handleSuccessfulAuth({ user, tokens });
+            
+            // Store organization info if available
+            if (organizationInfo) {
+              this.secureStorage.setItem('organization_info', JSON.stringify(organizationInfo))
+                .catch(err => console.error('Failed to save organization info:', err));
+            }
+            
+            this.notificationService.success(this.getMessage('SUCCESS.LOGIN'));
+          } else {
+            console.error('Invalid response structure - missing user or tokens');
+          }
         }
       }),
       catchError(error => {
+        console.error('Login error:', error);
         // Don't show notification here, let the component handle it
         return throwError(error);
       })
@@ -85,15 +104,32 @@ export class AuthService {
    * User Registration
    */
   register(userData: UserRegistration): Observable<AuthResponse> {
-    return this.apiService.post<AuthResponse>(API_ENDPOINTS.AUTH.REGISTER, userData).pipe(
-      map(response => response.data),
-      tap(authResponse => {
-        if (authResponse.success && authResponse.data) {
-          this.handleSuccessfulAuth(authResponse.data);
-          // Don't show notification here, let the component handle it
+    return this.apiService.post<any>(API_ENDPOINTS.AUTH.REGISTER, userData).pipe(
+      tap(response => {
+        console.log('Registration response received:', response);
+        
+        // Response structure: { success: true, message: string, data: { user, tokens, organizationInfo } }
+        if (response?.success && response?.data) {
+          const { user, tokens, organizationInfo } = response.data;
+          
+          if (user && tokens) {
+            console.log('Processing successful registration...');
+            this.handleSuccessfulAuth({ user, tokens });
+            
+            // Store organization info if available
+            if (organizationInfo) {
+              this.secureStorage.setItem('organization_info', JSON.stringify(organizationInfo))
+                .catch(err => console.error('Failed to save organization info:', err));
+            }
+            
+            // Don't show notification here, let the component handle it with the success message
+          } else {
+            console.error('Invalid response structure - missing user or tokens');
+          }
         }
       }),
       catchError(error => {
+        console.error('Registration error:', error);
         // Don't show notification here, let the component handle it
         return throwError(error);
       })
@@ -345,31 +381,35 @@ export class AuthService {
     this.clearStorageData();
   }
 
-  private initializeFromStorage(): void {
-    const userData = localStorage.getItem(APP_CONFIG.STORAGE_KEYS.USER_DATA);
-    if (userData) {
-      try {
-        const user: User = JSON.parse(userData);
+  private async initializeFromStorage(): Promise<void> {
+    try {
+      const user = await this.secureStorage.getUserData<User>();
+      if (user) {
         this.setCurrentUser(user);
         this.setAuthenticated(this.apiService.isAuthenticated());
         
         if (this.isAuthenticated()) {
           this.resetSessionTimer();
         }
-      } catch (error) {
-        this.clearStorageData();
       }
+    } catch (error) {
+      console.error('Failed to initialize from storage:', error);
+      this.clearStorageData();
     }
   }
 
-  private saveUserToStorage(user: User): void {
-    localStorage.setItem(APP_CONFIG.STORAGE_KEYS.USER_DATA, JSON.stringify(user));
-    localStorage.setItem(APP_CONFIG.STORAGE_KEYS.LAST_LOGIN, new Date().toISOString());
+  private async saveUserToStorage(user: User): Promise<void> {
+    try {
+      await this.secureStorage.setUserData(user);
+      await this.secureStorage.setItem('last_login', new Date().toISOString());
+    } catch (error) {
+      console.error('Failed to save user data to storage:', error);
+    }
   }
 
   private clearStorageData(): void {
-    localStorage.removeItem(APP_CONFIG.STORAGE_KEYS.USER_DATA);
-    localStorage.removeItem(APP_CONFIG.STORAGE_KEYS.LAST_LOGIN);
+    this.secureStorage.clearAuthData();
+    this.secureStorage.removeItem('last_login');
   }
 
   private startSessionMonitoring(): void {

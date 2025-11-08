@@ -79,7 +79,12 @@ export class LoginComponent implements OnInit {
 
     this.authService.login(loginData).subscribe({
       next: (response: any) => {
-        this.handleLoginSuccess();
+        // Response structure: { success: true, message: string, data: { user, tokens } }
+        if (response?.success || response?.data?.user) {
+          this.handleLoginSuccess();
+        } else {
+          this.handleLoginError({ error: { message: 'Invalid response from server' } });
+        }
       },
       error: (error: any) => {
         this.handleLoginError(error);
@@ -92,10 +97,12 @@ export class LoginComponent implements OnInit {
 
   private handleLoginSuccess(): void {
     this.loginAttempts = 0;
-    this.message = { type: 'success', text: 'Login successful! Redirecting...' };
+    this.message = { type: 'success', text: 'Login successful! Redirecting to dashboard...' };
+    
+    // Short delay for user feedback, then navigate
     setTimeout(() => {
       this.router.navigate([this.returnUrl]);
-    }, 1000);
+    }, 800);
   }
 
   private handleLoginError(error: any): void {

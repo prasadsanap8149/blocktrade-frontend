@@ -3,13 +3,14 @@
  * Centralized HTTP client for all API communications
  */
 
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { HttpClient, HttpHeaders, HttpParams, HttpErrorResponse } from '@angular/common/http';
 import { Observable, throwError, BehaviorSubject, of, timer } from 'rxjs';
 import { catchError, retryWhen, mergeMap, tap, map, switchMap, take, delay } from 'rxjs/operators';
 
 
 import { AuthTokens, User } from '../models/user.model';
+import { SecureStorageService } from '@app/shared/services/secure-storage.service';
 import { API_CONFIG, API_ENDPOINTS, CONTENT_TYPES } from '@app/shared/constants/api-endpoint.constants';
 import { APP_CONFIG } from '@app/shared/constants/app-config.constants';
 import { MESSAGES } from '@app/shared/constants/messages.constants';
@@ -53,6 +54,7 @@ export interface ApiRequestOptions {
 export class ApiService {
   private readonly baseUrl = API_CONFIG.BASE_URL;
   private readonly timeout = API_CONFIG.TIMEOUT;
+  private readonly secureStorage = inject(SecureStorageService);
   
   private tokenSubject = new BehaviorSubject<string | null>(null);
   private refreshTokenSubject = new BehaviorSubject<string | null>(null);
@@ -251,7 +253,19 @@ export class ApiService {
    */
   setToken(token: string): void {
     this.tokenSubject.next(token);
-    localStorage.setItem(APP_CONFIG.STORAGE_KEYS.ACCESS_TOKEN, token);
+    // Store in memory and encrypted storage
+    const refreshToken = this.refreshTokenSubject.value;
+    if (refreshToken) {
+      // If we have both tokens, store them encrypted together
+      this.secureStorage.setAuthTokens(token, refreshToken).catch((err: any) => {
+        console.error('Failed to save tokens with encryption:', err);
+        // Fallback to localStorage if encryption fails
+        localStorage.setItem(APP_CONFIG.STORAGE_KEYS.ACCESS_TOKEN, token);
+      });
+    } else {
+      // Temporarily store in localStorage until we have both tokens
+      localStorage.setItem(APP_CONFIG.STORAGE_KEYS.ACCESS_TOKEN, token);
+    }
   }
 
   /**
@@ -259,7 +273,19 @@ export class ApiService {
    */
   setRefreshToken(refreshToken: string): void {
     this.refreshTokenSubject.next(refreshToken);
-    localStorage.setItem(APP_CONFIG.STORAGE_KEYS.REFRESH_TOKEN, refreshToken);
+    // Store in memory and encrypted storage
+    const accessToken = this.tokenSubject.value;
+    if (accessToken) {
+      // If we have both tokens, store them encrypted together
+      this.secureStorage.setAuthTokens(accessToken, refreshToken).catch((err: any) => {
+        console.error('Failed to save tokens with encryption:', err);
+        // Fallback to localStorage if encryption fails
+        localStorage.setItem(APP_CONFIG.STORAGE_KEYS.REFRESH_TOKEN, refreshToken);
+      });
+    } else {
+      // Temporarily store in localStorage until we have both tokens
+      localStorage.setItem(APP_CONFIG.STORAGE_KEYS.REFRESH_TOKEN, refreshToken);
+    }
   }
 
   /**
@@ -282,8 +308,11 @@ export class ApiService {
   clearTokens(): void {
     this.tokenSubject.next(null);
     this.refreshTokenSubject.next(null);
+    // Clear from both encrypted storage and localStorage
+    this.secureStorage.clearAuthData();
     localStorage.removeItem(APP_CONFIG.STORAGE_KEYS.ACCESS_TOKEN);
     localStorage.removeItem(APP_CONFIG.STORAGE_KEYS.REFRESH_TOKEN);
+    console.log('Tokens cleared from all storage');
   }
 
   /**
@@ -504,12 +533,52 @@ export class ApiService {
     });
   }
 
-  private loadTokensFromStorage(): void {
-    const token = localStorage.getItem(APP_CONFIG.STORAGE_KEYS.ACCESS_TOKEN);
-    const refreshToken = localStorage.getItem(APP_CONFIG.STORAGE_KEYS.REFRESH_TOKEN);
-    
-    if (token) this.tokenSubject.next(token);
-    if (refreshToken) this.refreshTokenSubject.next(refreshToken);
+  private async loadTokensFromStorage(): Promise<void> {
+    try {
+      // Try to load from encrypted storage first
+      const tokens = await this.secureStorage.getAuthTokens();
+      
+      if (tokens.accessToken) {
+        this.tokenSubject.next(tokens.accessToken);
+        console.log('Access token loaded from encrypted storage');
+      }
+      if (tokens.refreshToken) {
+        this.refreshTokenSubject.next(tokens.refreshToken);
+        console.log('Refresh token loaded from encrypted storage');
+      }
+      
+      // If no tokens in encrypted storage, try localStorage as fallback
+      if (!tokens.accessToken && !tokens.refreshToken) {
+        const token = localStorage.getItem(APP_CONFIG.STORAGE_KEYS.ACCESS_TOKEN);
+        const refreshToken = localStorage.getItem(APP_CONFIG.STORAGE_KEYS.REFRESH_TOKEN);
+        
+        if (token) {
+          this.tokenSubject.next(token);
+          console.log('Access token loaded from localStorage (fallback)');
+        }
+        if (refreshToken) {
+          this.refreshTokenSubject.next(refreshToken);
+          console.log('Refresh token loaded from localStorage (fallback)');
+        }
+        
+        // Migrate to encrypted storage if found in localStorage
+        if (token && refreshToken) {
+          await this.secureStorage.setAuthTokens(token, refreshToken);
+          console.log('Tokens migrated to encrypted storage');
+          // Clean up localStorage after migration
+          localStorage.removeItem(APP_CONFIG.STORAGE_KEYS.ACCESS_TOKEN);
+          localStorage.removeItem(APP_CONFIG.STORAGE_KEYS.REFRESH_TOKEN);
+        }
+      }
+    } catch (error) {
+      console.error('Failed to load tokens from storage:', error);
+      // Fallback to localStorage
+      const token = localStorage.getItem(APP_CONFIG.STORAGE_KEYS.ACCESS_TOKEN);
+      const refreshToken = localStorage.getItem(APP_CONFIG.STORAGE_KEYS.REFRESH_TOKEN);
+      
+      if (token) this.tokenSubject.next(token);
+      if (refreshToken) this.refreshTokenSubject.next(refreshToken);
+    }
   }
 
   private isTokenExpired(token: string): boolean {

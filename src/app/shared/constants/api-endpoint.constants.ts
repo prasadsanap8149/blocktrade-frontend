@@ -41,6 +41,8 @@ export const API_ENDPOINTS = {
     STATUS: (userId: string) => `/roles/journey/${userId}`,
     STEP: (stepNumber: number) => `/roles/journey/step/${stepNumber}`,
     CONFIG: '/roles/journey/config',
+    ONBOARDING_STATUS: '/user-journey/status',
+    ONBOARDING_STEP: '/user-journey/complete-step',
   },
 
   // Letters of Credit endpoints
@@ -135,6 +137,18 @@ export const API_ENDPOINTS = {
     SECURITY: '/settings/security',
     NOTIFICATIONS: '/settings/notifications',
     ORGANIZATION: '/settings/organization',
+  },
+
+  // Dashboard endpoints
+  DASHBOARD: {
+    STATS: '/dashboard/stats',
+    ACTIVITIES: '/dashboard/activities',
+    NOTIFICATIONS: '/dashboard/notifications',
+    ALERTS: '/dashboard/alerts',
+    COMPLIANCE: '/dashboard/compliance',
+    SYSTEM_HEALTH: '/dashboard/system-health',
+    EXPORT: '/dashboard/export',
+    QUICK_ACTIONS: '/dashboard/quick-actions',
   },
 
   // Utility endpoints

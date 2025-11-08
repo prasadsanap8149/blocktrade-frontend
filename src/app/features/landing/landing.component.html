@@ -387,124 +387,285 @@
 
       <!-- Registration Form -->
       <div *ngIf="authMode === 'register'" class="auth-form-container">
-        <form [formGroup]="registerForm" (ngSubmit)="onRegisterSubmit()" class="auth-form">
-          <div class="form-row">
-            <div class="form-group">
-              <label class="form-label" for="firstName">First Name *</label>
-              <input type="text" id="firstName" class="form-input" formControlName="firstName"
-                placeholder="Enter your first name" [class.error]="isFieldInvalid('firstName', registerForm)">
-              <div *ngIf="isFieldInvalid('firstName', registerForm)" class="error-message">
-                First name is required
+        <form [formGroup]="registerForm" (ngSubmit)="onRegisterSubmit()" class="auth-form registration-form">
+
+          <!-- Organization Mode Toggle -->
+          <div class="org-mode-toggle">
+            <button type="button" class="toggle-btn" [class.active]="isNewOrganization"
+              (click)="toggleOrganizationMode()" [disabled]="isLoading">
+              <span class="toggle-icon">🏢</span>
+              <span class="toggle-text">Create New Organization</span>
+            </button>
+            <button type="button" class="toggle-btn" [class.active]="!isNewOrganization"
+              (click)="toggleOrganizationMode()" [disabled]="isLoading">
+              <span class="toggle-icon">🤝</span>
+              <span class="toggle-text">Join Existing Organization</span>
+            </button>
+          </div>
+
+          <!-- User Information Section -->
+          <div class="form-section">
+            <h3 class="section-title">Personal Information</h3>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="firstName">First Name *</label>
+                <input type="text" id="firstName" class="form-input" formControlName="firstName"
+                  placeholder="Enter your first name" [class.error]="isFieldInvalid('firstName', registerForm)">
+                <div *ngIf="getFieldError('firstName', registerForm)" class="error-message">
+                  {{ getFieldError('firstName', registerForm) }}
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="lastName">Last Name *</label>
+                <input type="text" id="lastName" class="form-input" formControlName="lastName"
+                  placeholder="Enter your last name" [class.error]="isFieldInvalid('lastName', registerForm)">
+                <div *ngIf="getFieldError('lastName', registerForm)" class="error-message">
+                  {{ getFieldError('lastName', registerForm) }}
+                </div>
               </div>
             </div>
+
             <div class="form-group">
-              <label class="form-label" for="lastName">Last Name *</label>
-              <input type="text" id="lastName" class="form-input" formControlName="lastName"
-                placeholder="Enter your last name" [class.error]="isFieldInvalid('lastName', registerForm)">
-              <div *ngIf="isFieldInvalid('lastName', registerForm)" class="error-message">
-                Last name is required
+              <label class="form-label" for="email">Email Address *</label>
+              <input type="email" id="reg-email" class="form-input" formControlName="email"
+                placeholder="your.email@example.com" [class.error]="isFieldInvalid('email', registerForm)">
+              <div *ngIf="getFieldError('email', registerForm)" class="error-message">
+                {{ getFieldError('email', registerForm) }}
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="phone">Phone Number *</label>
+                <input type="tel" id="phone" class="form-input" formControlName="phone" placeholder="+1-555-0123"
+                  [class.error]="isFieldInvalid('phone', registerForm)">
+                <small class="field-hint">International format (e.g., +1-555-0123)</small>
+                <div *ngIf="getFieldError('phone', registerForm)" class="error-message">
+                  {{ getFieldError('phone', registerForm) }}
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="username">Username *</label>
+                <input type="text" id="username" class="form-input" formControlName="username"
+                  placeholder="Choose a username" [class.error]="isFieldInvalid('username', registerForm)">
+                <small class="field-hint">3-30 characters, letters, numbers, underscore</small>
+                <div *ngIf="getFieldError('username', registerForm)" class="error-message">
+                  {{ getFieldError('username', registerForm) }}
+                </div>
+              </div>
+            </div>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="password">Password *</label>
+                <div class="password-input-container">
+                  <input [type]="showPassword ? 'text' : 'password'" id="reg-password" class="form-input"
+                    formControlName="password" placeholder="Create a strong password"
+                    [class.error]="isFieldInvalid('password', registerForm)">
+                  <button type="button" class="password-toggle" (click)="togglePassword('password')">
+                    {{ showPassword ? '🙈' : '👁️' }}
+                  </button>
+                </div>
+                <small class="field-hint">Min 8 chars: uppercase, lowercase, number, special char</small>
+                <div *ngIf="getFieldError('password', registerForm)" class="error-message">
+                  {{ getFieldError('password', registerForm) }}
+                </div>
+                <!-- Password Strength Indicator -->
+                <div class="password-strength" *ngIf="registerForm.get('password')?.value">
+                  <div class="strength-bar">
+                    <div class="strength-fill" [class]="getPasswordStrength()"></div>
+                  </div>
+                  <span class="strength-text" [class]="getPasswordStrength()">
+                    {{ getPasswordStrengthText() }}
+                  </span>
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="confirmPassword">Confirm Password *</label>
+                <div class="password-input-container">
+                  <input [type]="showConfirmPassword ? 'text' : 'password'" id="confirmPassword" class="form-input"
+                    formControlName="confirmPassword" placeholder="Confirm your password"
+                    [class.error]="isFieldInvalid('confirmPassword', registerForm)">
+                  <button type="button" class="password-toggle" (click)="togglePassword('confirmPassword')">
+                    {{ showConfirmPassword ? '🙈' : '👁️' }}
+                  </button>
+                </div>
+                <div *ngIf="getFieldError('confirmPassword', registerForm)" class="error-message">
+                  {{ getFieldError('confirmPassword', registerForm) }}
+                </div>
               </div>
             </div>
           </div>
 
-          <div class="form-group">
-            <label class="form-label" for="email">Email Address *</label>
-            <input type="email" id="email" class="form-input" formControlName="email"
-              placeholder="Enter your email address" [class.error]="isFieldInvalid('email', registerForm)">
-            <div *ngIf="isFieldInvalid('email', registerForm)" class="error-message">
-              <span *ngIf="registerForm.get('email')?.errors?.['required']">Email is required</span>
-              <span *ngIf="registerForm.get('email')?.errors?.['email']">Please enter a valid email</span>
+          <!-- Organization Information Section -->
+          <div class="form-section">
+            <h3 class="section-title">Organization Information</h3>
+
+            <div class="form-row">
+              <div class="form-group">
+                <label class="form-label" for="organizationName">Organization Name *</label>
+                <input type="text" id="organizationName" class="form-input" formControlName="organizationName"
+                  placeholder="Enter your organization name"
+                  [class.error]="isFieldInvalid('organizationName', registerForm)">
+                <div *ngIf="getFieldError('organizationName', registerForm)" class="error-message">
+                  {{ getFieldError('organizationName', registerForm) }}
+                </div>
+              </div>
+              <div class="form-group">
+                <label class="form-label" for="organizationType">Organization Type *</label>
+                <select id="organizationType" class="form-input" formControlName="organizationType"
+                  [class.error]="isFieldInvalid('organizationType', registerForm)">
+                  <option value="">Select organization type</option>
+                  <option *ngFor="let type of registrationOrgTypes" [value]="type.value">
+                    {{ type.label }}
+                  </option>
+                </select>
+                <div *ngIf="getFieldError('organizationType', registerForm)" class="error-message">
+                  {{ getFieldError('organizationType', registerForm) }}
+                </div>
+              </div>
+            </div>
+
+            <!-- New Organization Fields -->
+            <div *ngIf="isNewOrganization" class="conditional-fields new-org-fields">
+              <div class="info-banner">
+                <span class="info-icon">ℹ️</span>
+                <span>You are creating a new organization. You will be assigned as the administrator.</span>
+              </div>
+
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label" for="organizationCountryCode">Country *</label>
+                  <select id="organizationCountryCode" class="form-input" formControlName="organizationCountryCode"
+                    [class.error]="isFieldInvalid('organizationCountryCode', registerForm)">
+                    <option value="">Select country</option>
+                    <option *ngFor="let country of countryCodes" [value]="country.value">
+                      {{ country.label }}
+                    </option>
+                  </select>
+                  <div *ngIf="getFieldError('organizationCountryCode', registerForm)" class="error-message">
+                    {{ getFieldError('organizationCountryCode', registerForm) }}
+                  </div>
+                </div>
+                <div class="form-group" *ngIf="registerForm.get('organizationType')?.value === 'bank'">
+                  <label class="form-label" for="organizationSwiftCode">SWIFT/BIC Code</label>
+                  <input type="text" id="organizationSwiftCode" class="form-input"
+                    formControlName="organizationSwiftCode" placeholder="e.g., DIBKUS33"
+                    [class.error]="isFieldInvalid('organizationSwiftCode', registerForm)">
+                  <small class="field-hint">8 or 11 characters (optional for banks)</small>
+                  <div *ngIf="getFieldError('organizationSwiftCode', registerForm)" class="error-message">
+                    {{ getFieldError('organizationSwiftCode', registerForm) }}
+                  </div>
+                </div>
+              </div>
+
+              <!-- Organization Address -->
+              <div class="form-subsection" formGroupName="organizationAddress">
+                <h4 class="subsection-title">Organization Address *</h4>
+
+                <div class="form-group">
+                  <label class="form-label" for="street">Street Address *</label>
+                  <input type="text" id="street" class="form-input" formControlName="street"
+                    placeholder="123 Business Street">
+                </div>
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label" for="city">City *</label>
+                    <input type="text" id="city" class="form-input" formControlName="city" placeholder="City">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label" for="state">State/Province *</label>
+                    <input type="text" id="state" class="form-input" formControlName="state" placeholder="State">
+                  </div>
+                </div>
+
+                <div class="form-row">
+                  <div class="form-group">
+                    <label class="form-label" for="country">Country *</label>
+                    <input type="text" id="country" class="form-input" formControlName="country" placeholder="Country">
+                  </div>
+                  <div class="form-group">
+                    <label class="form-label" for="postalCode">Postal Code *</label>
+                    <input type="text" id="postalCode" class="form-input" formControlName="postalCode"
+                      placeholder="Postal Code">
+                  </div>
+                </div>
+
+                <div *ngIf="registerForm.get('organizationAddress')?.errors?.['incompleteAddress'] && 
+                            registerForm.get('organizationAddress')?.touched" class="error-message">
+                  Please complete all address fields
+                </div>
+              </div>
+
+              <!-- Registration & License Numbers -->
+              <div class="form-row">
+                <div class="form-group">
+                  <label class="form-label" for="organizationRegistrationNumber">Registration Number</label>
+                  <input type="text" id="organizationRegistrationNumber" class="form-input"
+                    formControlName="organizationRegistrationNumber" placeholder="e.g., BNK-2024-001">
+                  <small class="field-hint">Official registration number (optional)</small>
+                </div>
+                <div class="form-group"
+                  *ngIf="['nbfc', 'insurance', 'logistics'].includes(registerForm.get('organizationType')?.value)">
+                  <label class="form-label" for="organizationLicenseNumber">License Number *</label>
+                  <input type="text" id="organizationLicenseNumber" class="form-input"
+                    formControlName="organizationLicenseNumber" placeholder="e.g., RBI-NBFC-12345">
+                  <small class="field-hint">Required for regulated entities</small>
+                  <div *ngIf="getFieldError('organizationLicenseNumber', registerForm)" class="error-message">
+                    {{ getFieldError('organizationLicenseNumber', registerForm) }}
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- Existing Organization Fields -->
+            <div *ngIf="!isNewOrganization" class="conditional-fields existing-org-fields">
+              <div class="info-banner warning">
+                <span class="info-icon">⚠️</span>
+                <span>You are joining an existing organization. Contact your administrator for the Organization
+                  ID.</span>
+              </div>
+
+              <div class="form-group">
+                <label class="form-label" for="organizationId">Organization ID *</label>
+                <input type="text" id="organizationId" class="form-input" formControlName="organizationId"
+                  placeholder="Enter 24-character organization ID"
+                  [class.error]="isFieldInvalid('organizationId', registerForm)">
+                <small class="field-hint">24-character MongoDB ObjectId (e.g., 507f1f77bcf86cd799439011)</small>
+                <div *ngIf="getFieldError('organizationId', registerForm)" class="error-message">
+                  {{ getFieldError('organizationId', registerForm) }}
+                </div>
+              </div>
             </div>
           </div>
 
-          <div class="form-row">
+          <!-- Terms & Conditions -->
+          <div class="form-section">
             <div class="form-group">
-              <label class="form-label" for="phone">Phone Number *</label>
-              <input type="tel" id="phone" class="form-input" formControlName="phone"
-                placeholder="Enter your phone number" [class.error]="isFieldInvalid('phone', registerForm)">
-              <div *ngIf="isFieldInvalid('phone', registerForm)" class="error-message">
-                Phone number is required
+              <label class="checkbox-container">
+                <input type="checkbox" id="acceptTerms" formControlName="acceptTerms"
+                  [class.error]="isFieldInvalid('acceptTerms', registerForm)">
+                <span class="checkmark" [class.error]="isFieldInvalid('acceptTerms', registerForm)"></span>
+                <span class="checkbox-text">I accept the <a href="#" class="link">Terms and Conditions</a> and <a
+                    href="#" class="link">Privacy Policy</a> *</span>
+              </label>
+              <div *ngIf="getFieldError('acceptTerms', registerForm)" class="error-message">
+                {{ getFieldError('acceptTerms', registerForm) }}
               </div>
             </div>
+
             <div class="form-group">
-              <label class="form-label" for="username">Username *</label>
-              <input type="text" id="username" class="form-input" formControlName="username"
-                placeholder="Choose a username" [class.error]="isFieldInvalid('username', registerForm)">
-              <div *ngIf="isFieldInvalid('username', registerForm)" class="error-message">
-                Username is required
-              </div>
+              <label class="checkbox-container">
+                <input type="checkbox" id="agreeToMarketing" formControlName="agreeToMarketing">
+                <span class="checkmark"></span>
+                <span class="checkbox-text">I would like to receive updates and marketing communications</span>
+              </label>
             </div>
           </div>
 
-          <div class="form-row">
-            <div class="form-group">
-              <label class="form-label" for="organizationName">Organization Name *</label>
-              <input type="text" id="organizationName" class="form-input" formControlName="organizationName"
-                placeholder="Enter your organization name"
-                [class.error]="isFieldInvalid('organizationName', registerForm)">
-              <div *ngIf="isFieldInvalid('organizationName', registerForm)" class="error-message">
-                Organization name is required
-              </div>
-            </div>
-            <div class="form-group">
-              <label class="form-label" for="organizationType">Organization Type *</label>
-              <select id="organizationType" class="form-input" formControlName="organizationType"
-                [class.error]="isFieldInvalid('organizationType', registerForm)">
-                <option value="">Select organization type</option>
-                <option *ngFor="let type of registrationOrgTypes" [value]="type.value">
-                  {{ type.label }}
-                </option>
-              </select>
-              <div *ngIf="isFieldInvalid('organizationType', registerForm)" class="error-message">
-                Organization type is required
-              </div>
-            </div>
-          </div>
-
-          <div class="form-row">
-            <div class="form-group">
-              <label class="form-label" for="password">Password *</label>
-              <div class="password-input-container">
-                <input [type]="showPassword ? 'text' : 'password'" id="password" class="form-input"
-                  formControlName="password" placeholder="Create a strong password"
-                  [class.error]="isFieldInvalid('password', registerForm)">
-                <button type="button" class="password-toggle" (click)="togglePassword()">
-                  {{ showPassword ? '🙈' : '👁️' }}
-                </button>
-              </div>
-              <div *ngIf="isFieldInvalid('password', registerForm)" class="error-message">
-                <span *ngIf="registerForm.get('password')?.errors?.['required']">Password is required</span>
-                <span *ngIf="registerForm.get('password')?.errors?.['minlength']">Password must be at least 6
-                  characters</span>
-              </div>
-            </div>
-            <div class="form-group">
-              <label class="form-label" for="confirmPassword">Confirm Password *</label>
-              <input type="password" id="confirmPassword" class="form-input" formControlName="confirmPassword"
-                placeholder="Confirm your password" [class.error]="isFieldInvalid('confirmPassword', registerForm)">
-              <div *ngIf="isFieldInvalid('confirmPassword', registerForm)" class="error-message">
-                <span *ngIf="registerForm.get('confirmPassword')?.errors?.['required']">Password confirmation is
-                  required</span>
-                <span *ngIf="registerForm.get('confirmPassword')?.errors?.['passwordMismatch']">Passwords do not
-                  match</span>
-              </div>
-            </div>
-          </div>
-
-          <div class="form-group">
-            <label class="checkbox-container">
-              <input type="checkbox" id="acceptTerms" formControlName="acceptTerms"
-                [class.error]="isFieldInvalid('acceptTerms', registerForm)">
-              <span class="checkmark" [class.error]="isFieldInvalid('acceptTerms', registerForm)"></span>
-              <span class="checkbox-text">I accept the <a href="#" class="link">Terms and Conditions</a> and <a href="#"
-                  class="link">Privacy Policy</a> *</span>
-            </label>
-            <div *ngIf="isFieldInvalid('acceptTerms', registerForm)" class="error-message">
-              You must accept the terms and conditions
-            </div>
-          </div>
-
-          <button type="submit" class="btn btn-primary btn-full" [disabled]="registerForm.invalid || isLoading">
+          <button type="submit" class="btn btn-primary btn-full" [disabled]="isLoading">
             <span *ngIf="!isLoading">Create Account</span>
             <div *ngIf="isLoading" class="loading-spinner">
               <div class="spinner"></div>
