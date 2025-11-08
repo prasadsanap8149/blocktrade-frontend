@@ -512,18 +512,20 @@ export class LandingComponent implements OnInit {
       this.authService.login(loginData)
         .subscribe({
           next: (response: any) => {
-            this.isLoading = false;
             console.log('Login response:', response);
             // Response structure: { success: true, message: string, data: { user, tokens } }
             if (response?.user || response?.data?.user) {
               this.message = { type: 'success', text: 'Login successful! Redirecting to dashboard...' };
               
+              // Wait for auth data to be fully saved before navigating
               setTimeout(() => {
+                this.isLoading = false;
                 this.closeAuthModal();
                 // Navigate to dashboard
                 this.router.navigate(['/dashboard']);
-              }, 800);
+              }, 1200); // Increased delay to ensure data is persisted
             } else {
+              this.isLoading = false;
               this.message = { 
                 type: 'error', 
                 text: 'Invalid response from server. Please try again.' 
@@ -641,7 +643,6 @@ export class LandingComponent implements OnInit {
       this.authService.register(registrationData)
         .subscribe({
           next: (response: any) => {
-            this.isLoading = false;
             console.log('Registration response:', response);
             
             // Response structure: { success: true, message: string, data: { user, tokens, organizationInfo } }
@@ -665,12 +666,15 @@ export class LandingComponent implements OnInit {
                 text: successMessage
               };
               
+              // Wait for auth data to be fully saved before navigating
               setTimeout(() => {
+                this.isLoading = false;
                 this.closeAuthModal();
                 // Navigate to onboarding for new users
                 this.router.navigate(['/onboarding']);
-              }, 800);
+              }, 1200); // Increased delay to ensure data is persisted
             } else {
+              this.isLoading = false;
               this.message = { 
                 type: 'error', 
                 text: 'Invalid response from server. Please try again.' 

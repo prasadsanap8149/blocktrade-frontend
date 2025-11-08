@@ -69,28 +69,31 @@ export class AuthService {
    */
   login(credentials: UserLogin): Observable<AuthResponse> {
     return this.apiService.post<any>(API_ENDPOINTS.AUTH.LOGIN, credentials).pipe(
-      tap(response => {
-        console.log('Login response received:', response);
+      switchMap(async response => {
+        console.log('✓ Login response received');
         
         // Response structure: { success: true, message: string, data: { user, tokens, organizationInfo } }
         if (response?.success && response?.data) {
           const { user, tokens, organizationInfo } = response.data;
           
           if (user && tokens) {
-            console.log('Processing successful authentication...');
-            this.handleSuccessfulAuth({ user, tokens });
+            // Wait for auth data to be saved before continuing
+            await this.handleSuccessfulAuth({ user, tokens });
             
             // Store organization info if available
             if (organizationInfo) {
-              this.secureStorage.setItem('organization_info', JSON.stringify(organizationInfo))
+              await this.secureStorage.setItem('organization_info', JSON.stringify(organizationInfo))
                 .catch(err => console.error('Failed to save organization info:', err));
             }
             
+            console.log('✓ Authentication completed successfully');
             this.notificationService.success(this.getMessage('SUCCESS.LOGIN'));
           } else {
             console.error('Invalid response structure - missing user or tokens');
           }
         }
+        
+        return response;
       }),
       catchError(error => {
         console.error('Login error:', error);
@@ -105,28 +108,31 @@ export class AuthService {
    */
   register(userData: UserRegistration): Observable<AuthResponse> {
     return this.apiService.post<any>(API_ENDPOINTS.AUTH.REGISTER, userData).pipe(
-      tap(response => {
-        console.log('Registration response received:', response);
+      switchMap(async response => {
+        console.log('✓ Registration response received');
         
         // Response structure: { success: true, message: string, data: { user, tokens, organizationInfo } }
         if (response?.success && response?.data) {
           const { user, tokens, organizationInfo } = response.data;
           
           if (user && tokens) {
-            console.log('Processing successful registration...');
-            this.handleSuccessfulAuth({ user, tokens });
+            // Wait for auth data to be saved before continuing
+            await this.handleSuccessfulAuth({ user, tokens });
             
             // Store organization info if available
             if (organizationInfo) {
-              this.secureStorage.setItem('organization_info', JSON.stringify(organizationInfo))
+              await this.secureStorage.setItem('organization_info', JSON.stringify(organizationInfo))
                 .catch(err => console.error('Failed to save organization info:', err));
             }
             
+            console.log('✓ Registration completed successfully');
             // Don't show notification here, let the component handle it with the success message
           } else {
             console.error('Invalid response structure - missing user or tokens');
           }
         }
+        
+        return response;
       }),
       catchError(error => {
         console.error('Registration error:', error);
@@ -158,12 +164,13 @@ export class AuthService {
    */
   getCurrentUser(): Observable<User> {
     return this.apiService.get<User>(API_ENDPOINTS.AUTH.ME).pipe(
-      tap(response => {
+      switchMap(async response => {
         if (response.success && response.data) {
           this.setCurrentUser(response.data);
+          await this.saveUserToStorage(response.data);
         }
+        return response.data;
       }),
-      map(response => response.data),
       catchError(error => {
         if (error.status === 401) {
           this.handleUnauthorized();
@@ -178,13 +185,14 @@ export class AuthService {
    */
   updateProfile(profileData: UserProfile): Observable<User> {
     return this.apiService.put<User>(API_ENDPOINTS.AUTH.PROFILE, profileData).pipe(
-      tap(response => {
+      switchMap(async response => {
         if (response.success && response.data) {
           this.setCurrentUser(response.data);
+          await this.saveUserToStorage(response.data);
           this.notificationService.success(this.getMessage("SUCCESS.PROFILE_UPDATED"));
         }
+        return response.data;
       }),
-      map(response => response.data),
       catchError(error => {
         this.notificationService.error(error.message || this.getMessage("ERROR.GENERIC"));
         return throwError(error);
@@ -248,9 +256,10 @@ export class AuthService {
    */
   refreshToken(): Observable<AuthTokens> {
     return this.apiService.refreshToken().pipe(
-      tap(tokens => {
-        this.updateTokens(tokens);
+      switchMap(async tokens => {
+        await this.updateTokens(tokens);
         this.resetSessionTimer();
+        return tokens;
       }),
       catchError(error => {
         this.handleUnauthorized();
@@ -338,12 +347,15 @@ export class AuthService {
 
   // Private methods
 
-  private handleSuccessfulAuth(authData: { user: User; tokens: AuthTokens }): void {
+  private async handleSuccessfulAuth(authData: { user: User; tokens: AuthTokens }): Promise<void> {
+    // Wait for all auth data to be saved before proceeding
+    await this.updateTokens(authData.tokens);
+    await this.saveUserToStorage(authData.user);
+    
+    // Now update state - this order ensures data is persisted first
     this.setCurrentUser(authData.user);
-    this.updateTokens(authData.tokens);
     this.setAuthenticated(true);
     this.resetSessionTimer();
-    this.saveUserToStorage(authData.user);
   }
 
   private handleLogout(): void {
@@ -360,16 +372,20 @@ export class AuthService {
   private setCurrentUser(user: User): void {
     this.currentUserSubject.next(user);
     this.userPermissionsSubject.next(user.permissions);
-    this.saveUserToStorage(user);
+    // Don't save here - let the caller decide when to save
   }
 
   private setAuthenticated(authenticated: boolean): void {
     this.isAuthenticatedSubject.next(authenticated);
   }
 
-  private updateTokens(tokens: AuthTokens): void {
+  private async updateTokens(tokens: AuthTokens): Promise<void> {
+    // Set tokens in memory first
     this.apiService.setToken(tokens.accessToken);
     this.apiService.setRefreshToken(tokens.refreshToken);
+    
+    // Then save both to storage in one operation
+    await this.apiService.saveTokensToStorage(tokens.accessToken, tokens.refreshToken);
   }
 
   private clearSession(): void {

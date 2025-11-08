@@ -61,9 +61,13 @@ export class SecureStorageService {
       }
 
       localStorage.setItem(this.PREFIX + key, serializedValue);
+      // Reduced logging - only log for important items
+      if (['user_data', 'access_token', 'refresh_token'].includes(key)) {
+        console.log(`✓ Saved ${key} to secure storage`);
+      }
     } catch (error) {
       console.error('Failed to set secure storage item:', error);
-      throw new Error(`Failed to store item: ${key}`);
+      throw new Error(`Failed to store item: ${key} - ${error}`);
     }
   }
 
@@ -197,11 +201,17 @@ export class SecureStorageService {
    * Set user data with encryption
    */
   async setUserData(userData: any): Promise<void> {
-    return this.setSecureItem(
-      APP_CONFIG.STORAGE_KEYS.USER_DATA.replace('bt_', ''), 
-      userData,
-      APP_CONFIG.SECURITY.SESSION_TIMEOUT
-    );
+    try {
+      await this.setSecureItem(
+        APP_CONFIG.STORAGE_KEYS.USER_DATA.replace('bt_', ''), 
+        userData,
+        APP_CONFIG.SECURITY.SESSION_TIMEOUT
+      );
+      console.log('✓ User data persisted to secure storage');
+    } catch (error) {
+      console.error('Failed to save user data:', error);
+      throw error;
+    }
   }
 
   /**
@@ -215,18 +225,24 @@ export class SecureStorageService {
    * Set auth tokens with encryption
    */
   async setAuthTokens(accessToken: string, refreshToken: string): Promise<void> {
-    await Promise.all([
-      this.setSecureItem(
-        APP_CONFIG.STORAGE_KEYS.ACCESS_TOKEN.replace('bt_', ''), 
-        accessToken,
-        APP_CONFIG.SECURITY.SESSION_TIMEOUT
-      ),
-      this.setSecureItem(
-        APP_CONFIG.STORAGE_KEYS.REFRESH_TOKEN.replace('bt_', ''), 
-        refreshToken,
-        APP_CONFIG.SECURITY.SESSION_TIMEOUT * 2 // Refresh token lasts longer
-      )
-    ]);
+    try {
+      await Promise.all([
+        this.setSecureItem(
+          APP_CONFIG.STORAGE_KEYS.ACCESS_TOKEN.replace('bt_', ''), 
+          accessToken,
+          APP_CONFIG.SECURITY.SESSION_TIMEOUT
+        ),
+        this.setSecureItem(
+          APP_CONFIG.STORAGE_KEYS.REFRESH_TOKEN.replace('bt_', ''), 
+          refreshToken,
+          APP_CONFIG.SECURITY.SESSION_TIMEOUT * 2 // Refresh token lasts longer
+        )
+      ]);
+      console.log('✓ Auth tokens persisted to secure storage');
+    } catch (error) {
+      console.error('Failed to save auth tokens:', error);
+      throw error;
+    }
   }
 
   /**

@@ -239,43 +239,96 @@ export class DashboardComponent implements OnInit {
 
   private async initializeDashboard(): Promise<void> {
     try {
-      // Setup reactive subscriptions
+      console.log('Dashboard: Initializing...');
+      
+      // Setup reactive subscriptions first
       this.setupDashboardSubscriptions();
       
-      // Subscribe to current user from AuthService observable
-      this.authService.currentUser$.subscribe(user => {
-        if (user) {
-          console.log('Dashboard: User loaded from auth service', user);
-          this.currentUser.set(user);
-          this.loadUserJourney(user.id);
-        } else {
-          console.log('Dashboard: No user data available');
-          // If no user data but we're on dashboard, fetch it
-          if (this.authService.isAuthenticated()) {
-            console.log('Dashboard: Fetching current user from API');
-            this.authService.getCurrentUser().subscribe({
-              next: (fetchedUser) => {
-                console.log('Dashboard: User fetched successfully', fetchedUser);
-                this.currentUser.set(fetchedUser);
-                this.loadUserJourney(fetchedUser.id);
+      // Wait for authentication to be ready
+      await this.waitForAuthentication();
+      console.log('Dashboard: Authentication check complete');
+      
+      // Get current user immediately after auth check
+      const currentUser = this.authService.getCurrentUserValue();
+      if (currentUser) {
+        console.log('Dashboard: User data available, loading dashboard', currentUser);
+        this.currentUser.set(currentUser);
+        await this.loadUserJourney(currentUser.id);
+        
+        // Load dashboard data
+        this.dashboardService.loadAllDashboardData().subscribe({
+          next: () => {
+            console.log('Dashboard: Data loaded successfully');
+            this.isLoading.set(false);
+          },
+          error: (error) => {
+            console.error('Dashboard: Failed to load data', error);
+            this.isLoading.set(false);
+          }
+        });
+      } else {
+        console.log('Dashboard: No user data, fetching from API');
+        // Fetch from API if not in memory
+        this.authService.getCurrentUser().subscribe({
+          next: (fetchedUser) => {
+            console.log('Dashboard: User fetched from API', fetchedUser);
+            this.currentUser.set(fetchedUser);
+            this.loadUserJourney(fetchedUser.id);
+            
+            // Load dashboard data after user is fetched
+            this.dashboardService.loadAllDashboardData().subscribe({
+              next: () => {
+                console.log('Dashboard: Data loaded successfully');
+                this.isLoading.set(false);
               },
               error: (error) => {
-                console.error('Dashboard: Failed to fetch user', error);
+                console.error('Dashboard: Failed to load data', error);
+                this.isLoading.set(false);
               }
             });
+          },
+          error: (error) => {
+            console.error('Dashboard: Failed to fetch user', error);
+            this.isLoading.set(false);
+            this.router.navigate(['/auth/login']);
           }
-        }
-      });
-
-      // Load fresh dashboard data
-      this.dashboardService.loadAllDashboardData().subscribe({
-        next: () => console.log('Dashboard data loaded successfully'),
-        error: (error) => console.error('Failed to load dashboard data:', error)
-      });
+        });
+      }
 
     } catch (error) {
-      console.error('Error initializing dashboard:', error);
+      console.error('Dashboard: Initialization error', error);
+      this.isLoading.set(false);
     }
+  }
+
+  /**
+   * Wait for authentication state to be ready
+   */
+  private async waitForAuthentication(): Promise<void> {
+    return new Promise((resolve) => {
+      // Check if already authenticated
+      if (this.authService.isAuthenticated() && this.authService.getCurrentUserValue()) {
+        console.log('Dashboard: Already authenticated with user data');
+        resolve();
+        return;
+      }
+
+      // Wait for auth state to be ready (max 5 seconds)
+      const timeout = setTimeout(() => {
+        console.warn('Dashboard: Authentication wait timeout');
+        resolve();
+      }, 5000);
+
+      // Check periodically
+      const checkInterval = setInterval(() => {
+        if (this.authService.isAuthenticated() && this.authService.getCurrentUserValue()) {
+          console.log('Dashboard: Authentication ready');
+          clearInterval(checkInterval);
+          clearTimeout(timeout);
+          resolve();
+        }
+      }, 100);
+    });
   }
 
   private async loadUserJourney(userId: string): Promise<void> {

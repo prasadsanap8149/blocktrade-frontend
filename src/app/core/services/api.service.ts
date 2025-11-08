@@ -249,41 +249,29 @@ export class ApiService {
   }
 
   /**
-   * Set authentication token
+   * Set authentication token (in memory only)
    */
   setToken(token: string): void {
     this.tokenSubject.next(token);
-    // Store in memory and encrypted storage
-    const refreshToken = this.refreshTokenSubject.value;
-    if (refreshToken) {
-      // If we have both tokens, store them encrypted together
-      this.secureStorage.setAuthTokens(token, refreshToken).catch((err: any) => {
-        console.error('Failed to save tokens with encryption:', err);
-        // Fallback to localStorage if encryption fails
-        localStorage.setItem(APP_CONFIG.STORAGE_KEYS.ACCESS_TOKEN, token);
-      });
-    } else {
-      // Temporarily store in localStorage until we have both tokens
-      localStorage.setItem(APP_CONFIG.STORAGE_KEYS.ACCESS_TOKEN, token);
-    }
   }
 
   /**
-   * Set refresh token
+   * Set refresh token (in memory only)
    */
   setRefreshToken(refreshToken: string): void {
     this.refreshTokenSubject.next(refreshToken);
-    // Store in memory and encrypted storage
-    const accessToken = this.tokenSubject.value;
-    if (accessToken) {
-      // If we have both tokens, store them encrypted together
-      this.secureStorage.setAuthTokens(accessToken, refreshToken).catch((err: any) => {
-        console.error('Failed to save tokens with encryption:', err);
-        // Fallback to localStorage if encryption fails
-        localStorage.setItem(APP_CONFIG.STORAGE_KEYS.REFRESH_TOKEN, refreshToken);
-      });
-    } else {
-      // Temporarily store in localStorage until we have both tokens
+  }
+
+  /**
+   * Save both tokens to encrypted storage
+   */
+  async saveTokensToStorage(accessToken: string, refreshToken: string): Promise<void> {
+    try {
+      await this.secureStorage.setAuthTokens(accessToken, refreshToken);
+    } catch (err) {
+      console.error('Failed to save tokens with encryption:', err);
+      // Fallback to localStorage if encryption fails
+      localStorage.setItem(APP_CONFIG.STORAGE_KEYS.ACCESS_TOKEN, accessToken);
       localStorage.setItem(APP_CONFIG.STORAGE_KEYS.REFRESH_TOKEN, refreshToken);
     }
   }

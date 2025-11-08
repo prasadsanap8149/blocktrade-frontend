@@ -138,41 +138,56 @@ export class DashboardService {
   );
 
   constructor() {
-    this.initializeDashboard();
-    this.setupAutoRefresh();
-  }
-
-  /**
-   * Initialize dashboard data
-   */
-  private initializeDashboard(): void {
-    // Load cached data first for better UX
+    // Load cached data first for better UX (don't auto-load fresh data)
     this.loadCachedData().catch(error => console.warn('Cache loading failed:', error));
     
-    // Then load fresh data
-    this.loadAllDashboardData().subscribe();
+    // Setup auto-refresh but don't start loading immediately
+    // Component will control the initial load
+    this.setupAutoRefresh();
   }
 
   /**
    * Load all dashboard data
    */
   loadAllDashboardData(): Observable<any> {
+    console.log('DashboardService: Loading all dashboard data...');
     this.loadingSubject.next(true);
 
     return combineLatest([
-      this.loadDashboardStats(),
-      this.loadRecentActivities(),
-      this.loadNotifications(),
-      this.loadAlerts(),
-      this.loadComplianceStatus(),
-      this.loadSystemHealth()
+      this.loadDashboardStats().pipe(catchError(err => {
+        console.error('Stats loading failed:', err);
+        return this.dashboardStats$;
+      })),
+      this.loadRecentActivities().pipe(catchError(err => {
+        console.error('Activities loading failed:', err);
+        return this.recentActivities$;
+      })),
+      this.loadNotifications().pipe(catchError(err => {
+        console.error('Notifications loading failed:', err);
+        return this.notifications$;
+      })),
+      this.loadAlerts().pipe(catchError(err => {
+        console.error('Alerts loading failed:', err);
+        return this.alerts$;
+      })),
+      this.loadComplianceStatus().pipe(catchError(err => {
+        console.error('Compliance loading failed:', err);
+        return this.complianceStatus$;
+      })),
+      this.loadSystemHealth().pipe(catchError(err => {
+        console.error('System health loading failed:', err);
+        return this.systemHealth$;
+      }))
     ]).pipe(
-      tap(() => this.loadingSubject.next(false)),
-      catchError(error => {
+      tap(() => {
+        console.log('DashboardService: All data loaded successfully');
         this.loadingSubject.next(false);
-        this.notificationService.error('Failed to load dashboard data');
+      }),
+      catchError(error => {
         console.error('Dashboard data loading error:', error);
-        throw error;
+        this.loadingSubject.next(false);
+        // Don't throw error, just complete
+        return [];
       })
     );
   }
